@@ -1,1125 +1,506 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Akshay Raj // livey</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Stalinist+One&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet">
-
-<!-- ============================================================
-  ██████╗  █████╗ ████████╗ █████╗
-  ██╔══██╗██╔══██╗╚══██╔══╝██╔══██╗
-  ██║  ██║███████║   ██║   ███████║
-  ██║  ██║██╔══██║   ██║   ██╔══██║
-  ██████╔╝██║  ██║   ██║   ██║  ██║
-  ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝
-  All editable content lives in the <script id="SITE_DATA"> block
-  at the bottom of this file. Find the section marked:
-  ╔══════════════════════════════╗
-  ║  ✏️  EDIT YOUR CONTENT HERE  ║
-  ╚══════════════════════════════╝
-  Every array/object is clearly labelled. No CSS knowledge needed.
-============================================================ -->
-
-<style>
-/* ═══════════════════════════════════════════════════════════════
-   🎨  THEME  — change ONE variable to retheme the whole site
-   ───────────────────────────────────────────────────────────────
-   Paste any of these as --acc / --adim pair:
-
-   Hacker Green (default)   #70ff57   rgba(112,255,87,.08)
-   Spotify Green            #1db954   rgba(29,185,84,.08)
-   Cyber Red                #e63946   rgba(230,57,70,.08)
-   Neon Cyan                #00f5d4   rgba(0,245,212,.08)
-   Amber Warning            #f4a261   rgba(244,162,97,.08)
-   Electric Purple          #9b5de5   rgba(155,93,229,.08)
-═══════════════════════════════════════════════════════════════ */
-:root{
-  --bg:  #040404;
-  --bg2: #080808;
-  --w1:  #e0e0e0;
-  --w2:  #b0b0b0;
-  --w3:  #707070;
-  --w4:  #404040;
-  --w5:  #1e1e1e;
-  --w6:  #111111;
-
-  --acc:  #70ff57;
-  --adim: rgba(112,255,87,.08);
-
-  --mono: 'Share Tech Mono', monospace;
-  --orb:  'Orbitron', monospace;
-  --frak: 'Stalinist One', serif;
-  --body: 'Space Grotesk', sans-serif;
-  --pad:  clamp(1.5rem, 5vw, 4rem);
-}
-
-/* ── RESET ── */
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--w1);font-family:var(--body);overflow-x:hidden;cursor:none;font-size:16px;line-height:1.6}
-
-/* ── TEXTURE ── */
-body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");opacity:.4}
-body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:8999;
-  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.025) 3px,rgba(0,0,0,.025) 4px)}
-
-/* ── CURSOR ── */
-#cur{position:fixed;width:14px;height:14px;border:1px solid var(--w4);pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .18s,height .18s}
-#dot{position:fixed;width:3px;height:3px;background:var(--acc);pointer-events:none;z-index:9999;transform:translate(-50%,-50%)}
-body.hov #cur{width:30px;height:30px;border-color:var(--w5)}
-
-/* ── PARTICLES ── */
-#pts{position:fixed;inset:0;pointer-events:none;z-index:2;overflow:hidden}
-.pt{position:absolute;background:rgba(255,255,255,.15);animation:rise linear infinite}
-@keyframes rise{0%{transform:translateY(100vh);opacity:0}8%{opacity:1}90%{opacity:.1}100%{transform:translateY(-80px);opacity:0}}
-
-/* ── NAV ── */
-nav{position:fixed;top:0;left:0;right:0;z-index:500;padding:.9rem var(--pad);display:flex;justify-content:space-between;align-items:center;background:rgba(4,4,4,.92);backdrop-filter:blur(22px);border-bottom:1px solid var(--w6);transition:border-color .4s}
-nav.sc{border-bottom-color:rgba(112,255,87,.12)}
-.nlogo{font-family:var(--orb);font-size:.68rem;color:var(--w2);letter-spacing:.2em}
-.nlogo b{color:var(--acc)}
-.nlinks{display:flex;gap:1.8rem;list-style:none}
-.nlinks a{font-family:var(--mono);font-size:.62rem;color:var(--w3);text-decoration:none;letter-spacing:.12em;text-transform:uppercase;transition:color .2s;position:relative}
-.nlinks a::after{content:'';position:absolute;bottom:-2px;left:0;width:0;height:1px;background:var(--acc);transition:width .3s}
-.nlinks a:hover{color:var(--w1)}
-.nlinks a:hover::after{width:100%}
-
-/* hamburger */
-.ham{display:none;flex-direction:column;gap:5px;cursor:none;padding:4px;background:none;border:none}
-.ham span{display:block;width:22px;height:1px;background:var(--w3);transition:all .3s}
-.ham.open span:nth-child(1){transform:translateY(6px) rotate(45deg)}
-.ham.open span:nth-child(2){opacity:0}
-.ham.open span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
-.mob-menu{display:none;position:fixed;inset:0;background:rgba(4,4,4,.97);z-index:490;flex-direction:column;justify-content:center;align-items:center;gap:2.5rem}
-.mob-menu.open{display:flex}
-.mob-menu a{font-family:var(--orb);font-size:1.1rem;color:var(--w2);text-decoration:none;letter-spacing:.2em;text-transform:uppercase;transition:color .2s}
-.mob-menu a:hover{color:var(--acc)}
-
-/* ── HERO ── */
-#hero{min-height:100vh;position:relative;overflow:hidden;display:flex;align-items:center}
-.hgrid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.013) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.013) 1px,transparent 1px);background-size:50px 50px;animation:gd 35s linear infinite}
-@keyframes gd{from{background-position:0 0}to{background-position:50px 50px}}
-.vline{position:absolute;top:0;left:0;bottom:0;width:1px;background:linear-gradient(to bottom,transparent,var(--acc),transparent);opacity:.15}
-.hphoto{position:absolute;top:0;right:0;bottom:0;width:52%;z-index:1}
-.hphoto img{width:100%;height:100%;object-fit:cover;object-position:center top;filter:grayscale(100%) contrast(1.1) brightness(.8);display:block}
-.hphoto::before{content:'';position:absolute;inset:0;background:linear-gradient(to right,var(--bg) 0%,rgba(4,4,4,.88) 20%,rgba(4,4,4,.45) 50%,transparent 80%);z-index:1}
-.hphoto::after{content:'';position:absolute;bottom:0;left:0;right:0;height:200px;background:linear-gradient(to top,var(--bg),transparent);z-index:2}
-.hphoto-top{position:absolute;top:0;left:0;right:0;height:100px;background:linear-gradient(to bottom,var(--bg),transparent);z-index:2}
-.hcontent{position:relative;z-index:3;padding:6rem var(--pad) 4rem;max-width:min(680px,58%)}
-
-.htag{font-family:var(--mono);font-size:.75rem;color:var(--acc);letter-spacing:.3em;text-transform:uppercase;margin-bottom:1.8rem;display:flex;align-items:center;gap:.8rem;opacity:0;animation:fu .9s .1s ease both}
-.htag::before{content:'';display:inline-block;width:20px;height:1px;background:var(--acc)}
-.hname{font-family:var(--frak);font-size:clamp(2.2rem,5vw,4.8rem);color:var(--w1);line-height:1.1;letter-spacing:.04em;margin-bottom:.4rem;opacity:0;animation:fu .9s .2s ease both}
-.halias{font-family:var(--orb);font-size:clamp(.8rem,1.5vw,1.1rem);color:var(--w3);letter-spacing:.4em;text-transform:uppercase;margin-bottom:1.8rem;opacity:0;animation:fu .9s .28s ease both}
-.halias b{color:var(--acc)}
-.hrole{font-family:var(--mono);font-size:.9rem;color:var(--w2);letter-spacing:.05em;margin-bottom:1.8rem;line-height:2.1;opacity:0;animation:fu .9s .36s ease both}
-.hrole b{color:var(--acc)}
-.hquote{font-family:var(--body);font-size:.95rem;color:var(--w3);font-style:italic;max-width:420px;line-height:1.9;border-left:1px solid var(--acc);padding-left:1rem;margin-bottom:2.5rem;opacity:0;animation:fu .9s .44s ease both}
-.hbtns{display:flex;gap:.8rem;flex-wrap:wrap;opacity:0;animation:fu .9s .52s ease both}
-.btn{font-family:var(--mono);font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;padding:.8rem 1.8rem;text-decoration:none;border:1px solid;transition:all .3s;cursor:none;clip-path:polygon(5px 0%,100% 0%,calc(100% - 5px) 100%,0% 100%)}
-.btn-s{background:var(--acc);color:var(--bg);border-color:var(--acc)}
-.btn-s:hover{background:transparent;color:var(--w1);border-color:var(--w4)}
-.btn-g{background:transparent;color:var(--w2);border-color:var(--w5)}
-.btn-g:hover{border-color:var(--w3);color:var(--w1)}
-.shi{position:absolute;bottom:2rem;left:var(--pad);font-family:var(--mono);font-size:.6rem;color:var(--w4);letter-spacing:.2em;display:flex;align-items:center;gap:.5rem;z-index:4;opacity:0;animation:fu .9s 1.1s ease both}
-.shi::after{content:'';display:block;width:1px;height:36px;background:linear-gradient(to bottom,var(--w4),transparent);animation:sp 2s ease-in-out infinite}
-@keyframes sp{0%,100%{opacity:.3}50%{opacity:.9}}
-@keyframes fu{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
-
-/* ── STATS BAR ── */
-#stats{background:var(--bg)}
-.sbar{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--w6)}
-.si{background:var(--bg);padding:2.5rem 2rem;text-align:center;position:relative;overflow:hidden;transition:background .3s}
-.si::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:var(--acc);transform:scaleX(0);transition:transform .4s;transform-origin:left}
-.si:hover{background:var(--adim)}
-.si:hover::after{transform:scaleX(1)}
-.sn{font-family:var(--orb);font-size:clamp(2.2rem,4vw,3.2rem);font-weight:900;color:var(--w1);line-height:1}
-.sn i{color:var(--acc);font-style:normal}
-.sl{font-family:var(--mono);font-size:.7rem;color:var(--w3);letter-spacing:.12em;margin-top:.5rem;text-transform:uppercase}
-
-/* ── TERMINAL ── */
-#term{background:var(--bg2);padding:4rem var(--pad);border-top:1px solid var(--w6);border-bottom:1px solid var(--w6)}
-.tw{max-width:860px;margin:0 auto;background:#020202;border:1px solid var(--w6);overflow:hidden}
-.tbar{background:#070707;padding:.7rem 1.2rem;display:flex;align-items:center;gap:.5rem;border-bottom:1px solid var(--w6)}
-.td{width:9px;height:9px;border-radius:50%}
-.td.g{background:var(--acc)}.td.y{background:#333}.td.r{background:#1e1e1e}
-.ttit{font-family:var(--mono);font-size:.65rem;color:var(--w4);margin-left:auto;letter-spacing:.12em}
-.tbody{padding:1.8rem 2rem 1.5rem;font-family:var(--mono);font-size:.88rem;line-height:2;min-height:260px}
-.tp{color:var(--acc)}.tc{color:var(--w1)}.to{color:var(--w3)}.thl{color:var(--w1)}.tg{color:var(--w2)}
-.tcur{display:inline-block;width:8px;height:14px;background:var(--acc);vertical-align:middle;margin-left:2px;animation:cb 1s step-end infinite}
-@keyframes cb{0%,100%{opacity:1}50%{opacity:0}}
-
-/* ── SECTION CHROME ── */
-.sec{padding:6rem var(--pad)}
-.sec-label{font-family:var(--mono);font-size:.7rem;color:var(--acc);letter-spacing:.4em;text-transform:uppercase;margin-bottom:.6rem;display:flex;align-items:center;gap:.7rem}
-.sec-label::before{content:'';width:18px;height:1px;background:var(--acc)}
-.sec-title{font-family:var(--orb);font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:700;margin-bottom:3.5rem;letter-spacing:-.01em}
-.sec-title-frak{font-family:var(--frak);font-size:clamp(1.5rem,2.8vw,2.4rem);margin-bottom:3.5rem;letter-spacing:.06em}
-
-/* ── REVEAL ── */
-.rv{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
-.rv.in{opacity:1;transform:translateY(0)}
-.rv-l{opacity:0;transform:translateX(-22px);transition:opacity .7s ease,transform .7s ease}
-.rv-l.in{opacity:1;transform:translateX(0)}
-.rv-r{opacity:0;transform:translateX(22px);transition:opacity .7s ease,transform .7s ease}
-.rv-r.in{opacity:1;transform:translateX(0)}
-
-/* ── PLATFORM STATS ── */
-#platforms{background:var(--bg2)}
-.plat-stack{display:flex;flex-direction:column;gap:1px;background:var(--w6)}
-.plat-card{background:var(--bg2);padding:3rem var(--pad);display:grid;grid-template-columns:260px 1fr;gap:4rem;align-items:start;transition:background .3s}
-.plat-card:hover{background:var(--adim)}
-.plat-name{font-family:var(--orb);font-size:1.1rem;font-weight:700;margin-bottom:.5rem}
-.plat-rank{font-family:var(--mono);font-size:.75rem;color:var(--acc);letter-spacing:.15em;border:1px solid var(--acc);padding:.2rem .6rem;display:inline-block;margin-bottom:1.5rem}
-.plat-nums{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.2rem}
-.pn-num{font-family:var(--orb);font-size:1.8rem;font-weight:900;color:var(--w1);line-height:1}
-.pn-lbl{font-family:var(--mono);font-size:.6rem;color:var(--w3);letter-spacing:.1em;margin-top:.25rem}
-.plat-note{font-family:var(--mono);font-size:.65rem;color:var(--w3)}
-.pr-title{font-family:var(--mono);font-size:.65rem;color:var(--w3);letter-spacing:.2em;text-transform:uppercase;margin-bottom:.9rem}
-.rtags{display:flex;flex-wrap:wrap;gap:.4rem}
-.rtag{font-family:var(--mono);font-size:.65rem;padding:.25rem .6rem;background:transparent;border:1px solid var(--w6);color:var(--w3);letter-spacing:.04em;transition:all .25s;cursor:default}
-.rtag:hover{background:var(--adim);border-color:var(--acc);color:var(--w1)}
-.machine-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.4rem}
-.mi{display:flex;justify-content:space-between;padding:.4rem .5rem;border:1px solid var(--w6);transition:border-color .2s,background .2s}
-.mi:hover{border-color:var(--w5);background:rgba(255,255,255,.02)}
-.mname{font-family:var(--mono);font-size:.65rem;color:var(--w2)}
-.mdate{font-family:var(--mono);font-size:.58rem;color:var(--w4)}
-
-/* ── APPROACH — DESKTOP STICKY ── */
-#sticky-wrap{background:var(--bg);border-top:1px solid var(--w6);border-bottom:1px solid var(--w6);position:relative}
-.sticky-inner{display:grid;grid-template-columns:1fr 1fr;min-height:100vh;position:sticky;top:0;overflow:hidden}
-.sticky-left{display:flex;flex-direction:column;justify-content:center;padding:4rem var(--pad);border-right:1px solid var(--w6)}
-.sticky-right{display:flex;flex-direction:column;justify-content:center;padding:4rem 3rem;position:relative}
-.sticky-slides{position:absolute;inset:0}
-.sstep{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:4rem 3rem;opacity:0;transition:opacity .5s}
-.sstep.active{opacity:1}
-.sticky-label{font-family:var(--mono);font-size:.65rem;color:var(--acc);letter-spacing:.3em;text-transform:uppercase;margin-bottom:.8rem}
-.sticky-big{font-family:var(--orb);font-size:clamp(1.5rem,2.8vw,2.4rem);font-weight:900;line-height:1.1;margin-bottom:1.5rem}
-.sticky-body{font-family:var(--body);font-size:1rem;color:var(--w3);line-height:1.9;max-width:440px}
-.sstrigger{height:100vh}
-
-/* right panel code block */
-.code-block{font-family:var(--mono);font-size:.78rem;color:var(--w3);line-height:2.1;background:var(--w6);border:1px solid var(--w5);padding:1.5rem;margin-top:.5rem}
-.code-block .k{color:var(--acc)}
-.code-block .v{color:var(--w2)}
-.code-tree{list-style:none;font-family:var(--mono);font-size:.75rem;color:var(--w3);line-height:1.9}
-.code-tree li{padding-left:1rem;position:relative}
-.code-tree li::before{content:'├─';position:absolute;left:0;color:var(--w5)}
-.code-tree li:last-child::before{content:'└─'}
-.code-tree .k{color:var(--acc)}
-.code-tree .v{color:var(--w1)}
-.code-tree .dim{color:var(--w4)}
-
-/* ── APPROACH — MOBILE CARDS (hidden on desktop) ── */
-.approach-mobile{display:none}
-.am-card{background:var(--bg);border:1px solid var(--w6);margin-bottom:1px;overflow:hidden}
-.am-header{padding:1.4rem 1.5rem;display:flex;align-items:center;gap:1rem;cursor:pointer;border-bottom:1px solid transparent;transition:background .3s}
-.am-header:hover{background:var(--adim)}
-.am-header.open{background:var(--adim);border-bottom-color:var(--w6)}
-.am-num{font-family:var(--mono);font-size:.65rem;color:var(--acc);letter-spacing:.2em;min-width:2rem}
-.am-title{font-family:var(--orb);font-size:.85rem;font-weight:700;flex:1}
-.am-arrow{font-family:var(--mono);color:var(--acc);transition:transform .3s}
-.am-header.open .am-arrow{transform:rotate(90deg)}
-.am-body{display:none;padding:1.5rem;border-top:1px solid var(--w6)}
-.am-body.open{display:block}
-.am-desc{font-family:var(--body);font-size:.9rem;color:var(--w3);line-height:1.85;margin-bottom:1rem}
-.am-grid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
-.am-group{}
-.am-group-label{font-family:var(--mono);font-size:.6rem;color:var(--acc);letter-spacing:.2em;margin-bottom:.5rem;opacity:.8}
-.am-items{display:flex;flex-wrap:wrap;gap:.3rem}
-.am-item{font-family:var(--mono);font-size:.62rem;padding:.2rem .5rem;border:1px solid var(--w6);color:var(--w3)}
-
-/* ── EXPERIENCE ── */
-#exp{background:var(--bg)}
-.tl{position:relative;padding-left:2px}
-.tl::before{content:'';position:absolute;left:0;top:0;bottom:0;width:1px;background:var(--w6)}
-.tli{position:relative;padding:0 0 3.5rem 3rem;opacity:0;transform:translateX(-18px);transition:opacity .65s,transform .65s}
-.tli.in{opacity:1;transform:translateX(0)}
-.tldot{position:absolute;left:-5px;top:6px;width:11px;height:11px;background:var(--bg);border:1px solid var(--w4);transition:border-color .3s,background .3s}
-.tli:hover .tldot{border-color:var(--acc);background:var(--acc)}
-.tlmeta{display:flex;align-items:center;gap:1.2rem;margin-bottom:.5rem;flex-wrap:wrap}
-.tlco{font-family:var(--mono);font-size:.75rem;color:var(--acc);letter-spacing:.15em;text-transform:uppercase}
-.tlper{font-family:var(--mono);font-size:.68rem;color:var(--w4);letter-spacing:.07em}
-.tlrole{font-family:var(--orb);font-size:1.05rem;font-weight:700;margin-bottom:1rem;color:var(--w1)}
-.tldesc{font-size:.95rem;color:var(--w3);line-height:1.85}
-.tldesc li{list-style:none;padding-left:1.2rem;position:relative;margin-bottom:.4rem}
-.tldesc li::before{content:'>';position:absolute;left:0;color:var(--acc);font-family:var(--mono);font-size:.7rem;top:.2rem}
-.chips{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:1rem}
-.chip{font-family:var(--mono);font-size:.62rem;padding:.18rem .55rem;border:1px solid var(--w6);color:var(--w3);letter-spacing:.05em;transition:all .2s}
-.tli:hover .chip{border-color:var(--w5);color:var(--w2)}
-
-/* ── ARSENAL ── */
-#skills{background:var(--bg2)}
-.agrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--w6)}
-.ac{background:var(--bg2);padding:2.5rem;position:relative;overflow:hidden;transition:background .3s}
-.ac::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(to right,var(--acc),transparent);transform:scaleX(0);transform-origin:left;transition:transform .5s}
-.ac:hover{background:var(--adim)}
-.ac:hover::before{transform:scaleX(1)}
-.acat{font-family:var(--mono);font-size:.65rem;color:var(--acc);letter-spacing:.2em;text-transform:uppercase;margin-bottom:.6rem;opacity:.7}
-.atit{font-family:var(--orb);font-size:.9rem;font-weight:700;margin-bottom:1.3rem}
-.sbars{display:flex;flex-direction:column;gap:.9rem}
-.sbi-top{display:flex;justify-content:space-between;margin-bottom:.22rem}
-.sbn{font-family:var(--mono);font-size:.72rem;color:var(--w2)}
-.sbv{font-family:var(--mono);font-size:.65rem;color:var(--w4)}
-.sbt{height:1px;background:var(--w6);position:relative;overflow:hidden}
-.sbf{position:absolute;left:0;top:0;height:100%;background:var(--w2);width:0;transition:width 1.5s cubic-bezier(.4,0,.2,1)}
-.sbf.hi{background:var(--acc)}
-.ac.in .sbf{width:var(--w)}
-.tags{display:flex;flex-wrap:wrap;gap:.4rem}
-.tag{font-family:var(--mono);font-size:.68rem;padding:.25rem .6rem;background:transparent;border:1px solid var(--w6);color:var(--w3);letter-spacing:.04em;transition:all .22s;cursor:default}
-.tag:hover,.tag.h{background:var(--adim);border-color:var(--acc);color:var(--w1)}
-.plist{display:flex;flex-direction:column;gap:.55rem}
-.pi{display:flex;align-items:center;gap:.7rem;padding:.45rem 0;border-bottom:1px solid var(--w6)}
-.pi:last-child{border-bottom:none}
-.pin{font-family:var(--mono);font-size:.72rem;color:var(--w2);flex:1}
-.pbg{font-family:var(--mono);font-size:.62rem;padding:.12rem .45rem;border:1px solid var(--w5);color:var(--w3);letter-spacing:.06em}
-
-/* ── HOF ── */
-#hof{background:var(--bg)}
-.hof-logos{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--w6);margin-bottom:4rem}
-.hlc{background:var(--bg);padding:2rem 1rem;display:flex;flex-direction:column;align-items:center;gap:.5rem;transition:background .3s}
-.hlc:hover{background:var(--adim)}
-.hcount{font-family:var(--orb);font-size:1.6rem;font-weight:900;color:var(--w1)}
-.hcount b{color:var(--acc)}
-.hnam{font-family:var(--mono);font-size:.6rem;color:var(--w3);letter-spacing:.12em;text-align:center}
-.hrgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--w6)}
-.hri{background:var(--bg);padding:2.2rem 2.5rem;display:flex;gap:2rem;align-items:center;transition:background .3s}
-.hri:hover{background:var(--adim)}
-.rnum{font-family:var(--orb);font-size:2.8rem;font-weight:900;color:var(--acc);opacity:.35;line-height:1;min-width:4rem;text-align:right;transition:opacity .3s}
-.hri:hover .rnum{opacity:1}
-.revt{font-family:var(--orb);font-size:.82rem;font-weight:700;margin-bottom:.3rem}
-.rdet{font-family:var(--mono);font-size:.65rem;color:var(--w3);letter-spacing:.09em}
-
-/* ── PROJECTS ── */
-#projects{background:var(--bg2)}
-.proj-list{display:flex;flex-direction:column;gap:1px;background:var(--w6)}
-.pc{background:var(--bg2);display:grid;grid-template-columns:100px 1fr auto;gap:3rem;align-items:start;padding:2.8rem var(--pad);transition:background .3s;position:relative;overflow:hidden}
-.pc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:1px;background:var(--acc);transform:scaleY(0);transition:transform .4s;transform-origin:bottom}
-.pc:hover{background:var(--adim)}
-.pc:hover::before{transform:scaleY(1)}
-.pnum{font-family:var(--frak);font-size:clamp(2rem,3.5vw,3.5rem);color:rgba(255,255,255,.04);line-height:1;transition:color .3s;padding-top:.3rem}
-.pc:hover .pnum{color:rgba(112,255,87,.1)}
-.ptype{font-family:var(--mono);font-size:.65rem;color:var(--acc);letter-spacing:.18em;text-transform:uppercase;margin-bottom:.6rem;opacity:.7}
-.ptit{font-family:var(--orb);font-size:1.05rem;font-weight:700;margin-bottom:.8rem;color:var(--w1)}
-.pdesc{font-size:.95rem;color:var(--w3);line-height:1.85;max-width:680px}
-.plink{font-family:var(--mono);font-size:.65rem;color:var(--w2);text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;white-space:nowrap;padding-top:.5rem;transition:color .2s;border-bottom:1px solid var(--w6);padding-bottom:.1rem}
-.plink:hover{color:var(--acc);border-bottom-color:var(--acc)}
-
-/* ── CERTS ── */
-#certs{background:var(--bg)}
-.cert-list{display:flex;flex-direction:column;gap:1px;background:var(--w6)}
-.cc{background:var(--bg);display:grid;grid-template-columns:1fr auto;align-items:center;gap:2rem;padding:2rem var(--pad);transition:background .3s}
-.cc:hover{background:var(--adim)}
-.ciss{font-family:var(--mono);font-size:.65rem;color:var(--acc);letter-spacing:.2em;text-transform:uppercase;margin-bottom:.4rem;opacity:.7}
-.cname{font-family:var(--orb);font-size:.92rem;font-weight:700;color:var(--w1)}
-.clink{font-family:var(--mono);font-size:.65rem;color:var(--w3);text-decoration:none;letter-spacing:.08em;white-space:nowrap;transition:color .2s;display:inline-flex;align-items:center;gap:.3rem}
-.clink:hover{color:var(--acc)}
-
-/* ── CONTACT ── */
-#contact{background:var(--bg2);border-top:1px solid var(--w6);text-align:center;padding:6rem var(--pad)}
-.csub{font-family:var(--mono);font-size:.85rem;color:var(--w3);letter-spacing:.07em;line-height:2.3;margin-bottom:3.5rem;max-width:560px;margin-inline:auto}
-.csub b{color:var(--w1)}
-.cglinks{display:flex;justify-content:center;flex-wrap:wrap;gap:.7rem;max-width:640px;margin:0 auto}
-.cl{font-family:var(--mono);font-size:.7rem;color:var(--w3);text-decoration:none;letter-spacing:.14em;text-transform:uppercase;padding:.7rem 1.4rem;border:1px solid var(--w6);transition:all .3s;display:inline-flex;align-items:center;gap:.4rem}
-.cl::before{content:'//';color:var(--acc);font-size:.56rem;opacity:.6;transition:opacity .3s}
-.cl:hover{border-color:var(--w3);color:var(--w1)}
-.cl:hover::before{opacity:1}
-
-/* ── FOOTER ── */
-footer{padding:1.5rem var(--pad);border-top:1px solid var(--w6);display:flex;justify-content:space-between;align-items:center;background:var(--bg)}
-.fl{font-family:var(--mono);font-size:.65rem;color:var(--w4);letter-spacing:.1em}
-.fl b{color:var(--acc)}
-
-/* ── RESPONSIVE ── */
-@media(max-width:900px){
-  nav{padding:.9rem 1.5rem}
-  .nlinks{display:none}
-  .ham{display:flex}
-  .hcontent{max-width:100%;padding:5.5rem 1.5rem 3rem}
-  .hphoto{width:100%;opacity:.2}
-  .hphoto::before{background:linear-gradient(to bottom,var(--bg) 0%,rgba(4,4,4,.4) 40%,rgba(4,4,4,.8) 80%,var(--bg) 100%) !important}
-  .sbar{grid-template-columns:repeat(2,1fr)}
-  .plat-card{grid-template-columns:1fr;gap:2rem}
-  .agrid{grid-template-columns:1fr}
-  .hof-logos{grid-template-columns:repeat(3,1fr)}
-  .hrgrid{grid-template-columns:1fr}
-  .pc{grid-template-columns:1fr;gap:1rem}
-  .pnum{font-size:2rem;padding-top:0}
-  .plink{white-space:normal}
-  .cc{grid-template-columns:1fr;gap:.8rem}
-  /* sticky — hide on mobile, show accordion */
-  #sticky-wrap .sticky-inner,#sticky-wrap .sstrigger{display:none}
-  #sticky-wrap{padding:0;border:none}
-  .approach-mobile{display:block;padding:0 1.5rem 4rem}
-  .sec{padding:4rem 1.5rem}
-  #term{padding:3rem 1.5rem}
-  footer{flex-direction:column;gap:.4rem;text-align:center}
-}
-@media(max-width:520px){
-  .hof-logos{grid-template-columns:repeat(2,1fr)}
-  .sbar{grid-template-columns:repeat(2,1fr)}
-  .machine-grid{grid-template-columns:1fr 1fr}
-  .am-grid{grid-template-columns:1fr}
-}
-</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
 </head>
 <body>
-<div id="cur"></div>
-<div id="dot"></div>
-<div id="pts"></div>
+<x-dc>
+<helmet>
+<style>
+  html,body{margin:0;padding:0}
+  body{background:#060607;color:#f5f5f7;font-family:-apple-system,system-ui,"SF Pro Display",sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  a{color:#30D158;text-decoration:none}
+  a:hover{color:#7fe89b}
+  ::selection{background:rgba(48,209,88,.24);color:#fff}
+  ::-webkit-scrollbar{width:10px}
+  ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:10px}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+  @keyframes scrolldot{0%{transform:translateY(0);opacity:.9}70%{opacity:.1}100%{transform:translateY(14px);opacity:0}}
+  @keyframes drift1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(8vw,6vh) scale(1.15)}}
+  @keyframes drift2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-7vw,-5vh) scale(1.2)}}
+  @media (prefers-reduced-motion: reduce){[data-aurora]{animation:none!important}}
+</style>
+</helmet>
+<div id="root-wrap" style="--bg:#060607;--w1:#f5f5f7;--w2:#a1a1a6;--w3:#6e6e73;--line:rgba(255,255,255,.09);--surf:rgba(255,255,255,.045);--acc:#30D158;--acc2:#7fe89b;--mono:ui-monospace,'SF Mono',Menlo,monospace;--pad:clamp(20px,5vw,80px);color:var(--w1);font-family:-apple-system,system-ui,'SF Pro Display',sans-serif;min-height:100vh;overflow-x:hidden;position:relative">
 
-<!-- NAV (rendered by JS from DATA.nav) -->
-<nav id="nav">
-  <div class="nlogo" id="nav-logo"></div>
-  <ul class="nlinks" id="nav-links"></ul>
-  <button class="ham" id="ham" onclick="toggleMenu()"><span></span><span></span><span></span></button>
-</nav>
-<div class="mob-menu" id="mmenu"></div>
-
-<!-- HERO -->
-<section id="hero">
-  <div class="hgrid"></div>
-  <div class="vline"></div>
-  <div class="hphoto">
-    <div class="hphoto-top"></div>
-    <img src="dp.jpeg" alt="Akshay Raj">
+  <div aria-hidden="true" style="position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden">
+    <div data-aurora style="position:absolute;top:-12%;left:-8%;width:62vw;height:62vw;border-radius:50%;background:radial-gradient(circle,rgba(48,209,88,.11),transparent 62%);filter:blur(30px);animation:drift1 26s ease-in-out infinite"></div>
+    <div data-aurora style="position:absolute;bottom:-18%;right:-12%;width:58vw;height:58vw;border-radius:50%;background:radial-gradient(circle,rgba(48,209,88,.07),transparent 62%);filter:blur(30px);animation:drift2 32s ease-in-out infinite"></div>
   </div>
-  <div class="hcontent">
-    <div class="htag" id="hero-tag"></div>
-    <div class="hname" id="hero-name"></div>
-    <div class="halias" id="hero-alias"></div>
-    <div class="hrole" id="hero-role"></div>
-    <p class="hquote" id="hero-quote"></p>
-    <div class="hbtns">
-      <a href="#contact" class="btn btn-s">init_contact()</a>
-      <a href="#hof" class="btn btn-g">view_h0f()</a>
+
+  <nav id="nav" style="position:fixed;top:0;left:0;right:0;z-index:500;display:flex;align-items:center;justify-content:space-between;padding:14px var(--pad);background:rgba(6,6,7,.4);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);border-bottom:1px solid transparent;transition:background .5s ease,border-color .5s ease">
+    <a href="#about" style="font-family:var(--mono);font-size:13px;letter-spacing:.04em;color:var(--w1)">akshay raj<span style="color:var(--acc)"> // </span><span style="color:var(--w3)">livey</span></a>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="5">
+        <a href="{{ n.href }}" style="font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--w2);padding:8px 12px;border-radius:980px;transition:color .2s,background .2s" style-hover="color:var(--w1);background:rgba(255,255,255,.06)">{{ n.label }}</a>
+      </sc-for>
     </div>
-  </div>
-  <div class="shi">scroll</div>
-</section>
+  </nav>
 
-<!-- STATS BAR (rendered by JS) -->
-<div id="stats"><div class="sbar" id="stats-bar"></div></div>
-
-<!-- TERMINAL -->
-<div id="term">
-  <div class="tw">
-    <div class="tbar">
-      <div class="td g"></div><div class="td y"></div><div class="td r"></div>
-      <span class="ttit" id="term-title"></span>
-    </div>
-    <div class="tbody" id="tout"></div>
-  </div>
-</div>
-
-<!-- PLATFORMS -->
-<section class="sec" id="platforms" style="background:var(--bg2);padding-bottom:0;padding-top:5rem">
-  <div class="sec-label rv">00 // platform_stats</div>
-  <h2 class="sec-title rv">TryHackMe &amp; HackTheBox</h2>
-  <div class="plat-stack" id="plat-stack"></div>
-</section>
-
-<!-- APPROACH — desktop sticky + mobile accordion -->
-<div id="sticky-wrap">
-  <div class="sticky-inner" id="sticky-panel">
-    <div class="sticky-left">
-      <div class="sticky-label" id="s-label"></div>
-      <div class="sticky-big" id="s-big"></div>
-      <div class="sticky-body" id="s-body"></div>
-    </div>
-    <div class="sticky-right">
-      <div class="sticky-slides" id="slides"></div>
-    </div>
-  </div>
-  <div id="triggers"></div>
-</div>
-<!-- MOBILE accordion (shown only on mobile via CSS) -->
-<div class="approach-mobile" id="approach-mobile">
-  <div class="sec-label" style="margin-bottom:1.5rem;margin-top:4rem">methodology</div>
-  <h2 class="sec-title" style="margin-bottom:2rem">How I Work</h2>
-  <div id="am-cards"></div>
-</div>
-
-<!-- EXPERIENCE -->
-<section class="sec" id="exp">
-  <div class="sec-label rv">01 // experience</div>
-  <h2 class="sec-title rv">Field Operations</h2>
-  <div class="tl" id="exp-tl"></div>
-</section>
-
-<!-- ARSENAL -->
-<section class="sec" id="skills" style="background:var(--bg2)">
-  <div class="sec-label rv">02 // arsenal</div>
-  <h2 class="sec-title rv">Skill Set</h2>
-  <div class="agrid" id="skills-grid"></div>
-</section>
-
-<!-- HOF -->
-<section class="sec" id="hof">
-  <div class="sec-label rv">03 // hall_of_fame</div>
-  <div class="sec-title-frak rv">Hall of Fame</div>
-  <div class="hof-logos" id="hof-logos"></div>
-  <div class="sec-label rv" style="margin-bottom:1.5rem">competition rankings</div>
-  <div class="hrgrid" id="hof-rankings"></div>
-</section>
-
-<!-- PROJECTS -->
-<section class="sec" id="projects" style="background:var(--bg2)">
-  <div class="sec-label rv">04 // projects</div>
-  <h2 class="sec-title rv">Build Log</h2>
-  <div class="proj-list" id="proj-list"></div>
-</section>
-
-<!-- CERTS -->
-<section class="sec" id="certs">
-  <div class="sec-label rv">05 // certifications</div>
-  <h2 class="sec-title rv">Verified Access</h2>
-  <div class="cert-list" id="cert-list"></div>
-</section>
-
-<!-- CONTACT -->
-<section id="contact">
-  <div class="sec-label rv" style="justify-content:center">06 // contact</div>
-  <div class="sec-title-frak rv" style="text-align:center;margin-bottom:1rem" id="contact-title"></div>
-  <p class="csub rv" id="contact-sub"></p>
-  <div class="cglinks" id="contact-links"></div>
-</section>
-
-<footer>
-  <div class="fl" id="footer-left"></div>
-  <div class="fl" id="fc"></div>
-</footer>
-
-<!-- ╔══════════════════════════════════════════════════════════╗
-     ║  ✏️  EDIT YOUR CONTENT HERE — NO CSS KNOWLEDGE NEEDED  ║
-     ╚══════════════════════════════════════════════════════════╝ -->
-<script id="SITE_DATA">
-const DATA = {
-
-  /* ─── NAV ─────────────────────────────────────────────── */
-  nav: {
-    logo: 'AKSHAY RAJ <b>//</b> livey',
-    links: [
-      {label:'_home',    href:'#hero'},
-      {label:'_stats',   href:'#platforms'},
-      {label:'_exp',     href:'#exp'},
-      {label:'_h0f',     href:'#hof'},
-      {label:'_arsenal', href:'#skills'},
-      {label:'_projects',href:'#projects'},
-      {label:'_contact', href:'#contact'},
-    ]
-  },
-
-  /* ─── HERO ─────────────────────────────────────────────── */
-  hero: {
-    tag:   'security researcher · appsec engineer · ctf player',
-    name:  'AKSHAY RAJ',
-    alias: 'alias: <b>livey</b>',
-    role:  'Jr. Engineer — <b>Application Security</b> @ MindSprint<br>CTF Player — THM Legend L13 · HTB Hacker<br>HackTheBox — Meetup Organizer',
-    quote: '"The man who loves walking will walk further than the one who loves the destination."',
-  },
-
-  /* ─── STATS BAR ────────────────────────────────────────── */
-  stats: [
-    {num:'6', suffix:'×', label:'Companies Secured'},
-    {num:'2',  suffix:'×', label:'Conference Speaker'},
-    {num:'40', suffix:'+', label:'HTB Machines Pwned'},
-    {num:'125',suffix:'+', label:'THM Rooms Done'},
-  ],
-
-  /* ─── TERMINAL ─────────────────────────────────────────── */
-  terminal: {
-    title: 'livey@mindsprint:~$',
-    lines: [
-      {p:'livey@mindsprint:~$ ', cmd:'whoami'},
-      {o:'<span class="thl">akshay_raj</span> // alias: <span class="tp">livey</span> // Jr. AppSec Engineer @ MindSprint'},
-      {b:1},
-      {p:'livey@mindsprint:~$ ', cmd:'./recon --target self'},
-      {o:'[+] <span class="tg">HTB</span>         → Rank - Hacker // 40+ machines rooted // Akerva Fortress'},
-      {o:'[+] <span class="tg">THM</span>         → Legend L13 // 125+ rooms // Top 50 Global / Top 5 India'},
-      {o:'[+] <span class="tg">CTFtime</span>     → #15 National // 50+ competitions competed'},
-      {o:'[+] <span class="tg">Bug Bounty</span>  → HOF: Unilever(2×) OYO(3×) ClassDojo ACT(2×) BambuLabs'},
-      {o:'[+] <span class="tg">Projects</span>    → Cypher · SSTI-Fuzz · VulnLab CTF Machine'},
-      {b:1},
-      {p:'livey@mindsprint:~$ ', cmd:'cat /etc/achievements'},
-      {o:'>> <span class="tp">2nd</span> — Cyber Delta CTF [Global]'},
-      {o:'>> <span class="tp">5th</span> — Info-Sec Write-Ups CTF [Worldwide]'},
-      {o:'>> <span class="tp">9th</span> — Yukthi CTF [Tamil Nadu Police]'},
-      {o:'>> Speaker — NullCon Chennai × OWASP Chennai (×2, IIT Madras RP)'},
-      {b:1},
-      {p:'livey@mindsprint:~$ ', cmd:'_'},
-    ]
-  },
-
-  /* ─── PLATFORM STATS ───────────────────────────────────── */
-  platforms: [
-    {
-      name:  'TryHackMe',
-      rank:  'Legend — Level 13',
-      note:  'Top 50 Global · Top 5 India (Monthly)',
-      nums:  [{n:'125+',l:'Rooms Done'},{n:'4+',l:'Years Active'},{n:'3',l:'Advent of Cyber'}],
-      rightTitle: '// domains covered',
-      // ✏️ Add/remove room tags here
-      tags: [
-        'Web Exploitation','OWASP Juice Shop','SSTI','SQL Injection',
-        'Linux PrivEsc','Volatility','Active Directory','Network Services',
-        'Digital Forensics','OSINT / IMINT','Cryptography','Steganography',
-        'Burp Suite','Metasploit','Windows PrivEsc','Bash Scripting',
-        'SIEM / SOC','Hash Cracking','Mr Robot CTF','Internal (Hard)',
-        'Pickle Rick','OhSINT','Archangel','Blue','Attacktive Directory',
-        'OWASP Top 10','John the Ripper','Nmap Deep Dive',
-      ],
-      machines: null, // null = show tags, not machine grid
-    },
-    {
-      name:  'HackTheBox',
-      rank:  'Hacker Rank',
-      note:  'Akerva Fortress — 5 flags captured',
-      nums:  [{n:'40+',l:'Machines'},{n:'3+',l:'Years Active'},{n:'5+',l:'Fortresses'}],
-      rightTitle: '// recent machines rooted',
-      tags: null, // null = show machine grid
-      // ✏️ Add/remove machines here — format: {name, date}
-      machines: [
-        {name:'Conversor',   date:'Dec 25'},
-        {name:'UnderPass',   date:'Dec 24'},
-        {name:'LinkVortex',  date:'Dec 24'},
-        {name:'Alert',       date:'Nov 24'},
-        {name:'Chemistry',   date:'Oct 24'},
-        {name:'Cicada',      date:'Oct 24'},
-        {name:'Sightless',   date:'Sep 24'},
-        {name:'MonitorsThree',date:'Aug 24'},
-        {name:'Sea',         date:'Aug 24'},
-        {name:'PermX',       date:'Aug 24'},
-        {name:'Editorial',   date:'Jun 24'},
-        {name:'Headless',    date:'Mar 24'},
-        {name:'Bizness',     date:'Jan 24'},
-        {name:'Devvortex',   date:'Dec 23'},
-        {name:'Codify',      date:'Nov 23'},
-        {name:'TwoMillion',  date:'Aug 23'},
-        {name:'CozyHosting', date:'Sep 23'},
-        {name:'Analytics',   date:'Oct 23'},
-        {name:'Wifinetic',   date:'Sep 23'},
-        {name:'Broker',      date:'Nov 23'},
-        {name:'PC',          date:'Jun 23'},
-        {name:'Pilgrimage',  date:'Jun 23'},
-        {name:'Busqueda',    date:'Jul 23'},
-        {name:'Inject',      date:'Jul 23'},
-      ],
-    },
-  ],
-
-  /* ─── APPROACH (sticky scroll + mobile accordion) ─────── */
-  // Inspired by the recon flow diagram: Subdomain Enum → URL Enum → Tech Stack → Vuln Assessment
-  approach: [
-    {
-      label: '01 // recon',
-      big:   'Attack Surface Mapping',
-      body:  'Every engagement starts with subdomain enumeration using BBOT, AMASS and ALTERX (DNSX) in parallel. Target is broken down — alive subdomains found, passive sources queried, then active crawling begins.',
-      rightLabel: '01 // recon',
-      // ✏️ Edit these code groups — shown in right panel (desktop)
-      groups: [
-        {
-          key: '[subdomain enum]',
-          items: ['BBOT + AMASS + ALTERX(DNSX)','subfinder · finddomain · crt.sh','assetfinder · wayback']
-        },
-        {
-          key: '[DNS]',
-          items: ['DNSTake — takeover checks','Subzy — deprecated check']
-        },
-      ]
-    },
-    {
-      label: '02 // url enum',
-      big:   'URL & Endpoint Discovery',
-      body:  'With alive subdomains confirmed, URL enumeration begins across passive and active channels. Katana + Hakrawler + ParamSpider + Arjun handle active crawling. Passive results from GAU and URIfinder are cross-referenced.',
-      rightLabel: '02 // url enum',
-      groups: [
-        {
-          key: '[active crawling]',
-          items: ['Katana · Hakrawler','ParamSpider · Arjun']
-        },
-        {
-          key: '[url gathering]',
-          items: ['GAU', 'WayMoreUrls','URLFinder']
-        },
-      ]
-    },
-    {
-      label: '03 // fingerprint',
-      big:   'Tech Stack & Port Scan',
-      body:  'Wappalyzer / WhatWeb identifies tech stacks across all discovered targets. Gowitness captures web screenshots. httpx + Nabbu + NMAP scans ports — resolved IPs separated from unresolved. CDN excluded from port scanning.',
-      rightLabel: '03 // fingerprint',
-      groups: [
-        {
-          key: '[tech stack]',
-          items: ['HTTPX / WhatWeb','Framework → vuln mapping']
-        },
-        {
-          key: '[web snapshots]',
-          items: ['Gowitness']
-        },
-        {
-          key: '[port scan]',
-          items: ['HTTPx', 'Nabbu', 'NMAP']
-        },
-      ]
-    },
-    {
-      label: '04 // exploit',
-      big:   'Vulnerability Assessment',
-      body:  'With the full attack surface mapped, vulnerability assessment begins. Nuclei templates run across all targets. GF patterns combined with vulnerability-specific tools. API endpoints probed with GraphQL Map. XRays for deep scanning.',
-      rightLabel: '04 // exploit',
-      groups: [
-        {
-          key: '[vuln tools]',
-          items: ['Dalfox / XSStrike','SSRFMap · OpenRedireX','SQLMap · CRLFuzz','SSTIMap · Commix · Crosy']
-        },
-        {
-          key: '[nuclei + api]',
-          items: ['Nuclei + community templates','GF','GraphQL Map','Generation on YAML via AI']
-        },
-      ]
-    },
-  ],
-
-  /* ─── EXPERIENCE ───────────────────────────────────────── */
-  // ✏️ Add/remove jobs here
-  experience: [
-    {
-      company: 'MindSprint',
-      period:  'May 2025 – Present',
-      role:    'Jr. Engineer — Application Security',
-      bullets: [
-        'Application security assessments, VAPT and secure code reviews on enterprise systems',
-        'Threat modeling and vulnerability triage across production-grade applications',
-        'Collaborating with dev teams to remediate critical findings and establish secure SDLC',
-      ],
-      chips: ['AppSec','VAPT','Code Review','Threat Modeling','SDLC'],
-    },
-    {
-      company: 'HackTheBox',
-      period:  'Sep 2022 – Present',
-      role:    'Meetup Organizer',
-      bullets: [
-        'Launched 11+ large cybersecurity events and ethical hacking competitions with 400+ attendance',
-        'Coordinated 100+ member team across workshops, competitions & training sessions',
-        'Competed in 50+ CTF competitions — nationally 15th place on CTFtime (PrivateUser)',
-      ],
-      chips: ['CTF','Event Org','Community Lead','HackTheBox'],
-    },
-  ],
-
-  /* ─── ARSENAL ──────────────────────────────────────────── */
-  skills: {
-    // ✏️ Edit skill bars — value is 0-100
-    bars: [
-      {name:'Web Application Pentesting',   level:'Advanced',  val:90, hi:true},
-      {name:'Network Penetration Testing',  level:'Advanced',  val:84, hi:true},
-      {name:'OSINT & Recon',               level:'Advanced',  val:88},
-      {name:'Linux Privilege Escalation',  level:'Advanced',  val:86},
-      {name:'Active Directory Attacks',    level:'Proficient', val:72},
-      {name:'Forensics & Steganography',   level:'Proficient', val:78},
-      {name:'Cryptography (CTF)',          level:'Proficient', val:70},
-    ],
-    // ✏️ highlighted (h) = brighter tag
-    tools: [
-      {name:'Burp Suite Pro', h:true},{name:'ffuf',       h:true},
-      {name:'nuclei',         h:true},{name:'subfinder',  h:true},
-      {name:'amass',          h:true},{name:'httpx',      h:true},
-      {name:'gau',            h:true},{name:'waybackurls',h:true},
-      {name:'sqlmap'},  {name:'dalfox'},  {name:'nikto'},
-      {name:'gobuster'},{name:'nmap'},   {name:'metasploit'},
-      {name:'shodan'},  {name:'censys'}, {name:'BinWalk'},
-      {name:'Zsteg'},   {name:'mitmproxy'},{name:'CyberChef'},
-      {name:'Volatility'},{name:'Katana'},{name:'BBOT'},
-    ],
-    platforms: [
-      {name:'HackTheBox', badge:'Hacker Rank'},
-      {name:'TryHackMe',  badge:'Legend — L13'},
-      {name:'CTFtime',    badge:'#15 National'},
-      {name:'HackerOne',  badge:'Researcher'},
-      {name:'Bugcrowd',   badge:'Researcher'},
-    ],
-    languages: [
-      {name:'Python',h:true},{name:'Bash',h:true},{name:'C++'},{name:'C'},
-    ],
-  },
-
-  /* ─── HALL OF FAME ─────────────────────────────────────── */
-  // ✏️ Add/remove bug bounty companies
-  hofCompanies: [
-    {count:'2', suffix:'×', name:'UNILEVER'},
-    {count:'3', suffix:'×', name:'OYO ROOMS'},
-    {count:'1', suffix:'×', name:'CLASSDOJO'},
-    {count:'2', suffix:'×', name:'ACT FIBERNET'},
-    {count:'1', suffix:'×', name:'BAMBU LABS'},
-    {count:'1', suffix:'×', name:'PORSCHE'}
-  ],
-  // ✏️ Add/remove competition rankings
-  hofRankings: [
-    {rank:'02', event:'Cyber Delta CTF',        detail:'2ND PLACE // GLOBAL'},
-    {rank:'05', event:'Info-Sec Write-Ups CTF', detail:'5TH PLACE // WORLDWIDE'},
-    {rank:'09', event:'Yukthi CTF — TN Police', detail:'9TH PLACE // STATE LEVEL'},
-    {rank:'15', event:'CTFtime National',        detail:'#15 NATIONALLY // PrivateUser'},
-    {rank:'T50',event:'TryHackMe — Legend L13', detail:'TOP 50 WORLDWIDE // TOP 5 INDIA'},
-    {rank:'40+',event:'HackTheBox — Hacker Rank',detail:'40+ MACHINES ROOTED'},
-  ],
-
-  /* ─── PROJECTS ─────────────────────────────────────────── */
-  // ✏️ Add/remove projects — roman numeral auto-assigned
-  projects: [
-    {
-      type:  '// bash · recon · automation',
-      title: 'Cypher — Subdomain Enumerator',
-      desc:  'Automates comprehensive subdomain enumeration by running multiple well-known tools and passive data sources in parallel. Aggregates, deduplicates, and consolidates all discovered subdomains into a single output file for immediate use.',
-      link:  'https://github.com/akshayrajs/cypher',
-      linkLabel: 'github.com/akshayrajs/cypher',
-    },
-    {
-      type:  '// python · mitmproxy · web security',
-      title: 'SSTI Vulnerability Checker',
-      desc:  'Automated detection tool for Server-Side Template Injection powered by mitmproxy. Increased vulnerability reporting efficiency by 60%, enabling faster remediation and providing command execution risk data across diverse template engines.',
-      link:  'https://github.com/L1v3y/SSTI-Fuzz',
-      linkLabel: 'github.com/L1v3y/SSTI-Fuzz',
-    },
-    {
-      type:  '// ctf machine · owasp top 10',
-      title: 'Vulnerable Lab — CTF Machine',
-      desc:  'Intermediate-level CTF machine with 3–4 distinct vulnerabilities. Incorporates OWASP Top 10 attack surfaces including web application exploits and privilege escalation paths. Designed for realistic community skill-building.',
-      link:  'https://drive.google.com/file/d/19BP3VDScHWsgOQ2ZffNYlQ16A90dvWSr/view?usp=drive_link',
-      linkLabel: 'drive link',
-    },
-  ],
-
-  /* ─── CERTIFICATIONS ───────────────────────────────────── */
-  // ✏️ Add/remove certs
-  certs: [
-    {
-      issuer: 'Pristine InfoSolution',
-      name:   'Certified Information Security & Ethical Hacker (CISEH)',
-      link:   'https://drive.google.com/file/d/10iCZAhYX3byVjM6n52bxevMyfHCic1XH/view',
-    },
-    {
-      issuer: 'Microsoft',
-      name:   'SC-900: Security, Compliance & Identity Fundamentals',
-      link:   'https://www.credly.com/badges/2a640cd0-1a0b-429a-ac16-14e6a92dc9fd',
-    },
-    {
-      issuer: 'CISCO',
-      name:   'Networking Basics',
-      link:   'https://www.credly.com/badges/e89f91b6-8d3c-4dce-a25d-7aedcd38f7e4',
-    },
-  ],
-
-  /* ─── CONTACT ──────────────────────────────────────────── */
-  contact: {
-    title: 'Reach Out',
-    sub:   'Employed at <b>MindSprint</b> — Application Security<br>Open to research collaborations, CTF invites & speaking opportunities<br>Based in <b>Chennai, Tamil Nadu</b> — Available remote',
-    links: [
-      {label:'Email',      href:'mailto:kumpawatakshayraj@gmail.com'},
-      {label:'LinkedIn',   href:'https://www.linkedin.com/in/akshayrajs/'},
-      {label:'GitHub',     href:'https://github.com/L1v3y'},
-      {label:'Blog',       href:'https://medium.com/@livey'},
-      {label:'TryHackMe',  href:'https://tryhackme.com/p/livey'},
-      {label:'HackTheBox', href:'https://app.hackthebox.com/profile/824412'},
-    ]
-  },
-
-  /* ─── FOOTER ───────────────────────────────────────────── */
-  footer: '© 2026 <b>Akshay Raj</b> · all systems nominal',
-
-}; /* end DATA */
-</script>
-
-<!-- ── RENDERER ─────────────────────────────────────────── -->
-<script>
-const D = DATA;
-const romanNumerals = ['Ⅰ','Ⅱ','Ⅲ','Ⅳ','Ⅴ','Ⅵ','Ⅶ','Ⅷ'];
-
-/* NAV */
-document.getElementById('nav-logo').innerHTML = D.nav.logo;
-const nll = document.getElementById('nav-links');
-const mm  = document.getElementById('mmenu');
-D.nav.links.forEach(l=>{
-  nll.innerHTML += `<li><a href="${l.href}">${l.label}</a></li>`;
-  mm.innerHTML  += `<a href="${l.href}" onclick="closeMenu()">${l.label}</a>`;
-});
-
-/* HERO */
-document.getElementById('hero-tag').innerHTML   = D.hero.tag;
-document.getElementById('hero-name').innerHTML  = D.hero.name;
-document.getElementById('hero-alias').innerHTML = D.hero.alias;
-document.getElementById('hero-role').innerHTML  = D.hero.role;
-document.getElementById('hero-quote').textContent = D.hero.quote;
-
-/* STATS */
-document.getElementById('stats-bar').innerHTML = D.stats.map(s=>`
-  <div class="si rv">
-    <div class="sn">${s.num}<i>${s.suffix}</i></div>
-    <div class="sl">${s.label}</div>
-  </div>`).join('');
-
-/* TERMINAL */
-document.getElementById('term-title').textContent = D.terminal.title;
-
-/* PLATFORMS */
-document.getElementById('plat-stack').innerHTML = D.platforms.map((p,i)=>`
-  <div class="plat-card ${i%2===0?'rv-l':'rv-r'}" style="transition-delay:${i*.15}s">
-    <div class="plat-left">
-      <div class="plat-name">${p.name}</div>
-      <div class="plat-rank">${p.rank}</div>
-      <div class="plat-nums">${p.nums.map(n=>`
-        <div><div class="pn-num">${n.n}</div><div class="pn-lbl">${n.l}</div></div>`).join('')}
+  <section id="about" style="min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:140px var(--pad) 90px;position:relative;scroll-margin-top:90px">
+    <div style="position:absolute;inset:0;background:radial-gradient(120% 90% at 82% 12%,rgba(48,209,88,.10),transparent 55%);pointer-events:none"></div>
+    <div style="position:relative;z-index:1">
+      <div data-reveal style="display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:12.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--acc);margin:0 0 30px">
+        <span style="width:26px;height:1px;background:var(--acc);display:inline-block"></span>security researcher · appsec engineer · ctf player
       </div>
-      <div class="plat-note">${p.note}</div>
-    </div>
-    <div class="plat-right">
-      <div class="pr-title">${p.rightTitle}</div>
-      ${p.tags ? `<div class="rtags">${p.tags.map(t=>`<span class="rtag">${t}</span>`).join('')}</div>` : ''}
-      ${p.machines ? `<div class="machine-grid">${p.machines.map(m=>`
-        <div class="mi"><span class="mname">${m.name}</span><span class="mdate">${m.date}</span></div>`).join('')}
-      </div>` : ''}
-    </div>
-  </div>`).join('');
-
-/* APPROACH — Desktop sticky + Mobile accordion */
-const slidesEl  = document.getElementById('slides');
-const triggersEl = document.getElementById('triggers');
-const amCards   = document.getElementById('am-cards');
-
-D.approach.forEach((step, i) => {
-  // desktop slide
-  const groups = step.groups.map(g=>`
-    <div>
-      <div class="k">[${g.key.replace(/[\[\]]/g,'')}]</div>
-      ${g.items.map(it=>`<div><span class="v">→</span> ${it}</div>`).join('')}
-    </div>`).join('<br>');
-  slidesEl.innerHTML += `
-    <div class="sstep${i===0?' active':''}">
-      <div class="sticky-label">${step.rightLabel}</div>
-      <div class="code-block">${groups}</div>
-    </div>`;
-
-  // desktop trigger
-  triggersEl.innerHTML += `<div class="sstrigger" data-step="${i}"></div>`;
-
-  // mobile accordion card
-  const amGroupsHtml = step.groups.map(g=>`
-    <div class="am-group">
-      <div class="am-group-label">${g.key}</div>
-      <div class="am-items">${g.items.map(it=>`<span class="am-item">${it}</span>`).join('')}</div>
-    </div>`).join('');
-  amCards.innerHTML += `
-    <div class="am-card">
-      <div class="am-header" onclick="toggleAm(this)">
-        <span class="am-num">${step.label}</span>
-        <span class="am-title">${step.big}</span>
-        <span class="am-arrow">▸</span>
+      <h1 data-reveal data-delay="70" style="font-size:clamp(3.4rem,12.5vw,11rem);line-height:.9;letter-spacing:-.045em;font-weight:700;margin:0 0 8px;max-width:12ch">Akshay Raj</h1>
+      <div data-reveal data-delay="120" style="display:flex;align-items:center;gap:14px;margin:0 0 34px;flex-wrap:wrap">
+        <span id="phys-badge" style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13px;letter-spacing:.08em;color:var(--w1);background:var(--surf);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.12);border-radius:980px;padding:8px 15px;cursor:grab;user-select:none;touch-action:none;will-change:transform">
+          <span style="width:7px;height:7px;border-radius:50%;background:var(--acc);box-shadow:0 0 10px var(--acc)"></span>alias · livey
+        </span>
+        <span style="font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--w3)">drag me →</span>
       </div>
-      <div class="am-body${i===0?' open':''}">
-        <p class="am-desc">${step.body}</p>
-        <div class="am-grid">${amGroupsHtml}</div>
+      <p data-reveal data-delay="170" style="font-size:clamp(1.15rem,2.5vw,1.75rem);line-height:1.5;letter-spacing:-.012em;color:var(--w2);max-width:30ch;margin:0 0 44px;text-wrap:pretty">Application Security engineer at MindSprint. CTF player, HackTheBox meetup organizer, and bug-bounty researcher.</p>
+      <div data-reveal data-delay="220" style="display:flex;gap:12px;flex-wrap:wrap">
+        <a href="#contact" style="font-family:-apple-system,system-ui,sans-serif;font-size:16px;font-weight:500;letter-spacing:-.01em;color:#04120a;background:var(--acc);padding:13px 26px;border-radius:980px;transition:transform .18s cubic-bezier(.34,1.4,.64,1),box-shadow .3s;box-shadow:0 8px 30px rgba(48,209,88,.22)" style-hover="transform:scale(1.035)" style-active="transform:scale(.97)">Get in touch</a>
+        <a href="#projects" style="font-family:-apple-system,system-ui,sans-serif;font-size:16px;font-weight:500;letter-spacing:-.01em;color:var(--w1);background:var(--surf);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.12);padding:13px 26px;border-radius:980px;transition:transform .18s cubic-bezier(.34,1.4,.64,1),background .3s" style-hover="transform:scale(1.035);background:rgba(255,255,255,.09)" style-active="transform:scale(.97)">View work</a>
       </div>
-    </div>`;
-});
-
-/* EXPERIENCE */
-document.getElementById('exp-tl').innerHTML = D.experience.map((e,i)=>`
-  <div class="tli" style="transition-delay:${i*.15}s">
-    <div class="tldot"></div>
-    <div class="tlmeta">
-      <span class="tlco">${e.company}</span>
-      <span class="tlper">${e.period}</span>
     </div>
-    <div class="tlrole">${e.role}</div>
-    <ul class="tldesc">${e.bullets.map(b=>`<li>${b}</li>`).join('')}</ul>
-    <div class="chips">${e.chips.map(c=>`<span class="chip">${c}</span>`).join('')}</div>
-  </div>`).join('');
-
-/* ARSENAL */
-const sk = D.skills;
-document.getElementById('skills-grid').innerHTML = `
-  <div class="ac rv">
-    <div class="acat">// 01 — core disciplines</div>
-    <div class="atit">Penetration Testing</div>
-    <div class="sbars">${sk.bars.map(b=>`
-      <div>
-        <div class="sbi-top"><span class="sbn">${b.name}</span><span class="sbv">${b.level}</span></div>
-        <div class="sbt"><div class="sbf${b.hi?' hi':''}" style="--w:${b.val}%"></div></div>
-      </div>`).join('')}
+    <div style="position:absolute;bottom:34px;left:var(--pad);display:flex;align-items:center;gap:11px;font-family:var(--mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--w3)">
+      <span style="width:16px;height:24px;border:1px solid var(--w3);border-radius:980px;position:relative;display:inline-flex;justify-content:center;padding-top:5px"><span style="width:3px;height:5px;border-radius:3px;background:var(--acc);animation:scrolldot 1.6s ease-in-out infinite"></span></span>scroll
     </div>
-  </div>
-  <div class="ac rv" style="transition-delay:.1s">
-    <div class="acat">// 02 — bug bounty toolchain</div>
-    <div class="atit">Recon &amp; Exploitation</div>
-    <div class="tags">${sk.tools.map(t=>`<span class="tag${t.h?' h':''}">${t.name}</span>`).join('')}</div>
-  </div>
-  <div class="ac rv" style="transition-delay:.2s">
-    <div class="acat">// 03 — platforms &amp; rank</div>
-    <div class="atit">Active Platforms</div>
-    <div class="plist">${sk.platforms.map(p=>`
-      <div class="pi"><span class="pin">${p.name}</span><span class="pbg">${p.badge}</span></div>`).join('')}
+  </section>
+
+  <section style="padding:0 var(--pad) 30px">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;background:var(--line);border-radius:22px;overflow:hidden;border:1px solid var(--line)">
+      <sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
+        <div data-reveal style="background:var(--bg);padding:34px 26px;transition:background .3s" style-hover="background:rgba(48,209,88,.05)">
+          <div style="font-size:clamp(2.4rem,4vw,3.4rem);font-weight:700;letter-spacing:-.03em;line-height:1">{{ s.num }}<span style="color:var(--acc)">{{ s.suffix }}</span></div>
+          <div style="font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--w3);margin-top:10px">{{ s.label }}</div>
+        </div>
+      </sc-for>
     </div>
-    <div style="margin-top:1.3rem">
-      <div class="acat" style="margin-bottom:.6rem">// languages</div>
-      <div class="tags">${sk.languages.map(l=>`<span class="tag${l.h?' h':''}">${l.name}</span>`).join('')}</div>
+  </section>
+
+  <section style="padding:70px var(--pad) 90px">
+    <p data-reveal style="font-size:clamp(1.6rem,3.6vw,2.9rem);line-height:1.28;letter-spacing:-.02em;font-weight:500;color:var(--w1);max-width:20ch;text-wrap:balance;margin:0">The man who loves walking<span style="color:var(--w3)"> will walk further than the one who loves the destination.</span></p>
+  </section>
+
+  <section id="terminal" style="padding:40px var(--pad) 90px;scroll-margin-top:90px">
+    <div data-reveal style="max-width:900px;margin:0 auto;background:rgba(14,14,16,.72);backdrop-filter:blur(30px) saturate(170%);-webkit-backdrop-filter:blur(30px) saturate(170%);border:1px solid rgba(255,255,255,.09);border-radius:16px;overflow:hidden;box-shadow:0 40px 90px -30px rgba(0,0,0,.8)">
+      <div style="display:flex;align-items:center;gap:8px;padding:13px 18px;border-bottom:1px solid rgba(255,255,255,.06)">
+        <span style="width:11px;height:11px;border-radius:50%;background:#ff5f57"></span>
+        <span style="width:11px;height:11px;border-radius:50%;background:#febc2e"></span>
+        <span style="width:11px;height:11px;border-radius:50%;background:#28c840"></span>
+        <span style="font-family:var(--mono);font-size:12px;color:var(--w3);margin-left:auto;letter-spacing:.06em">livey@mindsprint: ~</span>
+      </div>
+      <div id="term-out" style="padding:22px 26px 26px;font-family:var(--mono);font-size:13.5px;line-height:1.95;min-height:290px;color:var(--w2)"></div>
     </div>
-  </div>`;
+  </section>
 
-/* HOF */
-document.getElementById('hof-logos').innerHTML = D.hofCompanies.map((c,i)=>`
-  <div class="hlc rv" style="transition-delay:${i*.07}s">
-    <div class="hcount">${c.count}<b>${c.suffix}</b></div>
-    <div class="hnam">${c.name}</div>
-  </div>`).join('');
-
-document.getElementById('hof-rankings').innerHTML = D.hofRankings.map((r,i)=>`
-  <div class="hri rv" style="transition-delay:${i*.07}s">
-    <div class="rnum">${r.rank}</div>
-    <div>
-      <div class="revt">${r.event}</div>
-      <div class="rdet">${r.detail}</div>
+  <section id="platforms" style="padding:70px var(--pad) 90px;scroll-margin-top:90px">
+    <div data-reveal style="display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--acc);margin:0 0 18px"><span style="width:24px;height:1px;background:var(--acc);display:inline-block"></span>00 — platform stats</div>
+    <h2 data-reveal style="font-size:clamp(2rem,4.5vw,3.4rem);letter-spacing:-.03em;font-weight:680;margin:0 0 48px;line-height:1.02">TryHackMe &amp; HackTheBox</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:20px">
+      <sc-for list="{{ platforms }}" as="p" hint-placeholder-count="2">
+        <div data-reveal style="background:var(--surf);backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:34px 32px;transition:border-color .3s,transform .3s cubic-bezier(.34,1.2,.64,1)" style-hover="border-color:rgba(48,209,88,.3);transform:translateY(-4px)">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:26px">
+            <div>
+              <div style="font-size:1.5rem;font-weight:650;letter-spacing:-.02em">{{ p.name }}</div>
+              <div style="font-family:var(--mono);font-size:11.5px;color:var(--w3);letter-spacing:.06em;margin-top:6px">{{ p.note }}</div>
+            </div>
+            <div style="font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--acc);border:1px solid rgba(48,209,88,.35);border-radius:980px;padding:6px 12px;white-space:nowrap">{{ p.rank }}</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding-bottom:24px;border-bottom:1px solid var(--line)">
+            <sc-for list="{{ p.nums }}" as="n" hint-placeholder-count="3">
+              <div><div style="font-size:1.7rem;font-weight:700;letter-spacing:-.02em;line-height:1">{{ n.n }}</div><div style="font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--w3);margin-top:7px">{{ n.l }}</div></div>
+            </sc-for>
+          </div>
+          <div style="font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--w3);margin:22px 0 14px">{{ p.rightTitle }}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:7px">
+            <sc-for list="{{ p.items }}" as="t" hint-placeholder-count="12">
+              <span style="font-family:var(--mono);font-size:11.5px;color:var(--w2);border:1px solid var(--line);border-radius:8px;padding:5px 10px;transition:border-color .2s,color .2s" style-hover="border-color:var(--acc);color:var(--w1)">{{ t.label }}<span style="color:var(--w3)">{{ t.meta }}</span></span>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
     </div>
-  </div>`).join('');
+  </section>
 
-/* PROJECTS */
-document.getElementById('proj-list').innerHTML = D.projects.map((p,i)=>`
-  <div class="pc rv" style="transition-delay:${i*.1}s">
-    <div class="pnum">${romanNumerals[i]||i+1}</div>
-    <div class="pmain">
-      <div class="ptype">${p.type}</div>
-      <div class="ptit">${p.title}</div>
-      <p class="pdesc">${p.desc}</p>
+  <section id="approach" style="padding:70px var(--pad) 90px;scroll-margin-top:90px">
+    <div data-reveal style="display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--acc);margin:0 0 18px"><span style="width:24px;height:1px;background:var(--acc);display:inline-block"></span>01 — methodology</div>
+    <h2 data-reveal style="font-size:clamp(2rem,4.5vw,3.4rem);letter-spacing:-.03em;font-weight:680;margin:0 0 48px;line-height:1.02">How I work</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px">
+      <sc-for list="{{ approach }}" as="a" hint-placeholder-count="4">
+        <div data-reveal style="background:var(--surf);border:1px solid rgba(255,255,255,.07);border-radius:22px;padding:30px 28px;transition:transform .3s cubic-bezier(.34,1.2,.64,1),border-color .3s" style-hover="transform:translateY(-4px);border-color:rgba(255,255,255,.14)">
+          <div style="font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--acc);margin-bottom:16px">{{ a.label }}</div>
+          <div style="font-size:1.25rem;font-weight:640;letter-spacing:-.02em;margin-bottom:14px">{{ a.title }}</div>
+          <p style="font-size:14.5px;line-height:1.7;color:var(--w2);margin:0 0 22px;text-wrap:pretty">{{ a.body }}</p>
+          <sc-for list="{{ a.groups }}" as="g" hint-placeholder-count="2">
+            <div style="margin-bottom:14px">
+              <div style="font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--w3);margin-bottom:8px">{{ g.key }}</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px">
+                <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="3">
+                  <span style="font-family:var(--mono);font-size:11px;color:var(--w2);border:1px solid var(--line);border-radius:7px;padding:4px 9px">{{ it }}</span>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-for>
     </div>
-    <a href="${p.link}" class="plink" target="_blank">↗ ${p.linkLabel}</a>
-  </div>`).join('');
+  </section>
 
-/* CERTS */
-document.getElementById('cert-list').innerHTML = D.certs.map((c,i)=>`
-  <div class="cc rv" style="transition-delay:${i*.07}s">
-    <div>
-      <div class="ciss">${c.issuer}</div>
-      <div class="cname">${c.name}</div>
+  <section id="experience" style="padding:70px var(--pad) 90px;scroll-margin-top:90px">
+    <div data-reveal style="display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--acc);margin:0 0 18px"><span style="width:24px;height:1px;background:var(--acc);display:inline-block"></span>02 — experience</div>
+    <h2 data-reveal style="font-size:clamp(2rem,4.5vw,3.4rem);letter-spacing:-.03em;font-weight:680;margin:0 0 48px;line-height:1.02">Field operations</h2>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <sc-for list="{{ experience }}" as="e" hint-placeholder-count="2">
+        <div data-reveal style="display:flex;flex-wrap:wrap;gap:18px 34px;background:var(--surf);border:1px solid rgba(255,255,255,.07);border-radius:22px;padding:32px 30px;transition:border-color .3s" style-hover="border-color:rgba(48,209,88,.25)">
+          <div style="flex:1 1 160px">
+            <div style="font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">{{ e.company }}</div>
+            <div style="font-family:var(--mono);font-size:11.5px;color:var(--w3);margin-top:8px">{{ e.period }}</div>
+          </div>
+          <div style="flex:4 1 320px;min-width:0">
+            <div style="font-size:1.2rem;font-weight:640;letter-spacing:-.02em;margin-bottom:16px">{{ e.role }}</div>
+            <div style="display:flex;flex-direction:column;gap:9px;margin-bottom:18px">
+              <sc-for list="{{ e.bullets }}" as="b" hint-placeholder-count="3">
+                <div style="display:flex;gap:11px;font-size:14.5px;line-height:1.6;color:var(--w2)"><span style="color:var(--acc);font-family:var(--mono);font-size:12px;margin-top:2px">→</span><span style="text-wrap:pretty">{{ b }}</span></div>
+              </sc-for>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+              <sc-for list="{{ e.chips }}" as="c" hint-placeholder-count="4">
+                <span style="font-family:var(--mono);font-size:11px;color:var(--w3);border:1px solid var(--line);border-radius:7px;padding:4px 9px">{{ c }}</span>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-for>
     </div>
-    <a href="${c.link}" class="clink" target="_blank">↗ verify</a>
-  </div>`).join('');
+  </section>
 
-/* CONTACT */
-document.getElementById('contact-title').textContent = D.contact.title;
-document.getElementById('contact-sub').innerHTML = D.contact.sub;
-document.getElementById('contact-links').innerHTML = D.contact.links.map(l=>`
-  <a href="${l.href}" class="cl rv" target="_blank">${l.label}</a>`).join('');
+  <section id="skills" style="padding:70px var(--pad) 90px;scroll-margin-top:90px">
+    <div data-reveal style="display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--acc);margin:0 0 18px"><span style="width:24px;height:1px;background:var(--acc);display:inline-block"></span>03 — arsenal</div>
+    <h2 data-reveal style="font-size:clamp(2rem,4.5vw,3.4rem);letter-spacing:-.03em;font-weight:680;margin:0 0 48px;line-height:1.02">Skill set</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px">
+      <div data-reveal style="background:var(--surf);border:1px solid rgba(255,255,255,.07);border-radius:22px;padding:30px 28px">
+        <div style="font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--acc);margin-bottom:22px">core disciplines</div>
+        <div style="display:flex;flex-direction:column;gap:18px">
+          <sc-for list="{{ bars }}" as="b" hint-placeholder-count="7">
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:9px"><span style="font-size:13.5px;color:var(--w1)">{{ b.name }}</span><span style="font-family:var(--mono);font-size:11px;color:var(--w3)">{{ b.level }}</span></div>
+              <div style="height:4px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden"><div data-bar data-val="{{ b.val }}" style="height:100%;width:0;border-radius:4px;background:var(--acc)"></div></div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div data-reveal style="background:var(--surf);border:1px solid rgba(255,255,255,.07);border-radius:22px;padding:30px 28px">
+        <div style="font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--acc);margin-bottom:22px">recon &amp; exploitation</div>
+        <div style="display:flex;flex-wrap:wrap;gap:7px">
+          <sc-for list="{{ tools }}" as="t" hint-placeholder-count="18">
+            <span style="font-family:var(--mono);font-size:12px;color:{{ t.color }};border:1px solid {{ t.border }};border-radius:8px;padding:5px 11px;transition:border-color .2s,color .2s" style-hover="border-color:var(--acc);color:var(--w1)">{{ t.name }}</span>
+          </sc-for>
+        </div>
+        <div style="font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--acc);margin:26px 0 14px">languages</div>
+        <div style="display:flex;flex-wrap:wrap;gap:7px">
+          <sc-for list="{{ languages }}" as="l" hint-placeholder-count="4">
+            <span style="font-family:var(--mono);font-size:12px;color:{{ l.color }};border:1px solid {{ l.border }};border-radius:8px;padding:5px 11px">{{ l.name }}</span>
+          </sc-for>
+        </div>
+      </div>
+      <div data-reveal style="background:var(--surf);border:1px solid rgba(255,255,255,.07);border-radius:22px;padding:30px 28px">
+        <div style="font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--acc);margin-bottom:22px">platforms &amp; rank</div>
+        <div style="display:flex;flex-direction:column">
+          <sc-for list="{{ skillPlatforms }}" as="p" hint-placeholder-count="5">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--line)"><span style="font-size:13.5px;color:var(--w1)">{{ p.name }}</span><span style="font-family:var(--mono);font-size:11px;color:var(--w3);border:1px solid var(--line);border-radius:7px;padding:3px 9px;white-space:nowrap">{{ p.badge }}</span></div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </section>
 
-/* FOOTER */
-document.getElementById('footer-left').innerHTML = D.footer;
+  <section id="hof" style="padding:70px var(--pad) 90px;scroll-margin-top:90px">
+    <div data-reveal style="display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--acc);margin:0 0 18px"><span style="width:24px;height:1px;background:var(--acc);display:inline-block"></span>04 — hall of fame</div>
+    <h2 data-reveal style="font-size:clamp(2rem,4.5vw,3.4rem);letter-spacing:-.03em;font-weight:680;margin:0 0 40px;line-height:1.02">Recognition</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:20px;overflow:hidden;margin-bottom:40px">
+      <sc-for list="{{ hofCompanies }}" as="c" hint-placeholder-count="6">
+        <div data-reveal style="background:var(--bg);padding:28px 20px;display:flex;flex-direction:column;align-items:center;gap:8px;transition:background .3s" style-hover="background:rgba(48,209,88,.05)">
+          <div style="font-size:1.7rem;font-weight:700;letter-spacing:-.02em">{{ c.count }}<span style="color:var(--acc)">{{ c.suffix }}</span></div>
+          <div style="font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;color:var(--w3);text-align:center">{{ c.name }}</div>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px">
+      <sc-for list="{{ hofRankings }}" as="r" hint-placeholder-count="6">
+        <div data-reveal style="display:flex;align-items:center;gap:22px;background:var(--surf);border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:22px 26px;transition:border-color .3s" style-hover="border-color:rgba(48,209,88,.28)">
+          <div style="font-size:2rem;font-weight:700;color:var(--acc);letter-spacing:-.03em;min-width:64px;text-align:right">{{ r.rank }}</div>
+          <div><div style="font-size:14.5px;font-weight:600;letter-spacing:-.01em;margin-bottom:5px">{{ r.event }}</div><div style="font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;color:var(--w3)">{{ r.detail }}</div></div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
 
+  <section id="projects" style="padding:70px var(--pad) 90px;scroll-margin-top:90px">
+    <div data-reveal style="display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--acc);margin:0 0 18px"><span style="width:24px;height:1px;background:var(--acc);display:inline-block"></span>05 — projects</div>
+    <h2 data-reveal style="font-size:clamp(2rem,4.5vw,3.4rem);letter-spacing:-.03em;font-weight:680;margin:0 0 48px;line-height:1.02">Build log</h2>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <sc-for list="{{ projects }}" as="p" hint-placeholder-count="3">
+        <a href="{{ p.link }}" target="_blank" style="display:grid;grid-template-columns:56px 1fr auto;gap:26px;align-items:center;background:var(--surf);border:1px solid rgba(255,255,255,.07);border-radius:22px;padding:30px 30px;transition:border-color .3s,transform .3s cubic-bezier(.34,1.2,.64,1);color:var(--w1)" style-hover="border-color:rgba(48,209,88,.3);transform:translateY(-3px)">
+          <div style="font-size:1.9rem;font-weight:300;color:var(--w3);letter-spacing:-.02em">{{ p.num }}</div>
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--acc);margin-bottom:9px">{{ p.type }}</div>
+            <div style="font-size:1.2rem;font-weight:640;letter-spacing:-.02em;margin-bottom:9px">{{ p.title }}</div>
+            <p style="font-size:14px;line-height:1.65;color:var(--w2);margin:0;max-width:70ch;text-wrap:pretty">{{ p.desc }}</p>
+          </div>
+          <span style="font-family:var(--mono);font-size:11.5px;color:var(--w3);white-space:nowrap;display:flex;align-items:center;gap:6px">{{ p.linkLabel }} <span style="color:var(--acc)">↗</span></span>
+        </a>
+      </sc-for>
+    </div>
+  </section>
 
-/* ── INTERACTION ─────────────────────────────────────── */
+  <section id="certs" style="padding:70px var(--pad) 90px;scroll-margin-top:90px">
+    <div data-reveal style="display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--acc);margin:0 0 18px"><span style="width:24px;height:1px;background:var(--acc);display:inline-block"></span>06 — certifications</div>
+    <h2 data-reveal style="font-size:clamp(2rem,4.5vw,3.4rem);letter-spacing:-.03em;font-weight:680;margin:0 0 48px;line-height:1.02">Verified access</h2>
+    <div style="display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:20px;overflow:hidden">
+      <sc-for list="{{ certs }}" as="c" hint-placeholder-count="3">
+        <a href="{{ c.link }}" target="_blank" style="display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;background:var(--bg);padding:26px 30px;transition:background .3s;color:var(--w1)" style-hover="background:rgba(48,209,88,.05)">
+          <div><div style="font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--acc);margin-bottom:8px">{{ c.issuer }}</div><div style="font-size:1.05rem;font-weight:600;letter-spacing:-.01em">{{ c.name }}</div></div>
+          <span style="font-family:var(--mono);font-size:11.5px;color:var(--w3);white-space:nowrap">verify <span style="color:var(--acc)">↗</span></span>
+        </a>
+      </sc-for>
+    </div>
+  </section>
 
-/* cursor */
-const cur=document.getElementById('cur'),dot=document.getElementById('dot');
-let cx=0,cy=0,tx=0,ty=0;
-document.addEventListener('mousemove',e=>{tx=e.clientX;ty=e.clientY;dot.style.left=tx+'px';dot.style.top=ty+'px'});
-(function loop(){cx+=(tx-cx)*.09;cy+=(ty-cy)*.09;cur.style.left=cx+'px';cur.style.top=cy+'px';requestAnimationFrame(loop)})();
-document.querySelectorAll('a,button,.ham').forEach(el=>{
-  el.addEventListener('mouseenter',()=>document.body.classList.add('hov'));
-  el.addEventListener('mouseleave',()=>document.body.classList.remove('hov'));
-});
+  <section id="contact" style="padding:100px var(--pad) 90px;text-align:center;scroll-margin-top:90px;position:relative">
+    <div style="position:absolute;inset:0;background:radial-gradient(80% 90% at 50% 0%,rgba(48,209,88,.10),transparent 60%);pointer-events:none"></div>
+    <div style="position:relative;z-index:1">
+      <div data-reveal style="font-family:var(--mono);font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--acc);margin-bottom:20px">07 — contact</div>
+      <h2 data-reveal style="font-size:clamp(2.4rem,6vw,4.5rem);letter-spacing:-.035em;font-weight:700;margin:0 0 24px;line-height:1">Reach out</h2>
+      <p data-reveal style="font-family:var(--mono);font-size:13.5px;line-height:2;color:var(--w2);max-width:52ch;margin:0 auto 44px">Application Security @ <span style="color:var(--w1)">MindSprint</span>. Open to research collaborations, CTF invites &amp; speaking. Based in <span style="color:var(--w1)">Chennai, Tamil Nadu</span> — available remote.</p>
+      <div data-reveal style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:640px;margin:0 auto">
+        <sc-for list="{{ contact }}" as="l" hint-placeholder-count="6">
+          <a href="{{ l.href }}" target="_blank" style="font-family:var(--mono);font-size:12.5px;letter-spacing:.06em;color:var(--w2);background:var(--surf);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.1);border-radius:980px;padding:12px 22px;transition:border-color .3s,color .3s,transform .18s cubic-bezier(.34,1.4,.64,1)" style-hover="border-color:var(--acc);color:var(--w1);transform:scale(1.04)" style-active="transform:scale(.97)">{{ l.label }}</a>
+        </sc-for>
+      </div>
+    </div>
+  </section>
 
-/* mobile menu */
-function toggleMenu(){
-  document.getElementById('ham').classList.toggle('open');
-  document.getElementById('mmenu').classList.toggle('open');
-}
-function closeMenu(){
-  document.getElementById('ham').classList.remove('open');
-  document.getElementById('mmenu').classList.remove('open');
-}
+  <footer style="padding:26px var(--pad);border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center">
+    <div style="font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;color:var(--w3)">© 2026 <span style="color:var(--w1)">Akshay Raj</span> · all systems nominal</div>
+    <div id="clock" style="font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;color:var(--w3)"></div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:900},&quot;accentColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#30D158&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#30D158&quot;,&quot;#0A84FF&quot;,&quot;#5E5CE6&quot;,&quot;#E5E5E5&quot;],&quot;section&quot;:&quot;Theme&quot;},&quot;motion&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Physical&quot;,&quot;options&quot;:[&quot;Physical&quot;,&quot;Calm&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Motion&quot;}}">
+class Component extends DCLogic {
+  nav = [
+    {label:'about',href:'#about'},{label:'platforms',href:'#platforms'},
+    {label:'experience',href:'#experience'},{label:'projects',href:'#projects'},
+    {label:'contact',href:'#contact'},
+  ];
+  stats = [
+    {num:'6',suffix:'×',label:'Companies Secured'},
+    {num:'2',suffix:'×',label:'Conference Talks'},
+    {num:'40',suffix:'+',label:'HTB Machines Pwned'},
+    {num:'125',suffix:'+',label:'THM Rooms Done'},
+  ];
+  terminalLines = [
+    {p:'livey@mindsprint:~$ ',cmd:'whoami'},
+    {o:'<span style="color:#f5f5f7">akshay_raj</span>  //  alias <span style="color:#30D158">livey</span>  //  Jr. AppSec Engineer @ MindSprint'},
+    {b:1},
+    {p:'livey@mindsprint:~$ ',cmd:'./recon --target self'},
+    {o:'[+] <span style="color:#c9c9cf">HTB</span>        → Hacker rank · 40+ machines rooted · Akerva Fortress'},
+    {o:'[+] <span style="color:#c9c9cf">THM</span>        → Legend L13 · 125+ rooms · Top 50 global / Top 5 India'},
+    {o:'[+] <span style="color:#c9c9cf">CTFtime</span>    → #15 national · 50+ competitions'},
+    {o:'[+] <span style="color:#c9c9cf">Bug Bounty</span> → HOF: Unilever(2×) OYO(3×) ClassDojo ACT(2×) BambuLabs'},
+    {b:1},
+    {p:'livey@mindsprint:~$ ',cmd:'cat /etc/achievements'},
+    {o:'<span style="color:#30D158">2nd</span> — Cyber Delta CTF [Global]'},
+    {o:'<span style="color:#30D158">5th</span> — Info-Sec Write-Ups CTF [Worldwide]'},
+    {o:'<span style="color:#30D158">9th</span> — Yukthi CTF [Tamil Nadu Police]'},
+    {o:'Speaker — NullCon Chennai × OWASP Chennai (×2, IIT Madras RP)'},
+    {b:1},
+    {p:'livey@mindsprint:~$ ',cmd:'_',end:1},
+  ];
+  platforms = [
+    {name:'TryHackMe',rank:'Legend · L13',note:'Top 50 global · Top 5 India (monthly)',
+     nums:[{n:'125+',l:'Rooms'},{n:'4+',l:'Years'},{n:'3',l:'Advent'}],
+     rightTitle:'domains covered',
+     items:['Web Exploitation','SSTI','SQL Injection','Linux PrivEsc','Active Directory','Digital Forensics','OSINT','Cryptography','Steganography','Burp Suite','Metasploit','Windows PrivEsc','SIEM / SOC','Hash Cracking','OWASP Top 10','Nmap'].map(x=>({label:x,meta:''})) },
+    {name:'HackTheBox',rank:'Hacker rank',note:'Akerva Fortress — 5 flags captured',
+     nums:[{n:'40+',l:'Machines'},{n:'3+',l:'Years'},{n:'5+',l:'Fortresses'}],
+     rightTitle:'recent machines rooted',
+     items:[['Conversor','Dec 25'],['UnderPass','Dec 24'],['LinkVortex','Dec 24'],['Alert','Nov 24'],['Chemistry','Oct 24'],['Cicada','Oct 24'],['Sightless','Sep 24'],['PermX','Aug 24'],['Editorial','Jun 24'],['Headless','Mar 24'],['Devvortex','Dec 23'],['Codify','Nov 23'],['TwoMillion','Aug 23'],['Pilgrimage','Jun 23']].map(m=>({label:m[0]+' ',meta:m[1]})) },
+  ];
+  approach = [
+    {label:'01 // recon',title:'Attack surface mapping',body:'Every engagement starts with subdomain enumeration — BBOT, Amass and Alterx run in parallel. Alive subdomains surfaced, passive sources queried, then active crawling begins.',
+     groups:[{key:'[subdomain enum]',items:['BBOT · Amass · Alterx','subfinder · crt.sh','assetfinder · wayback']},{key:'[dns]',items:['DNSTake','Subzy']}]},
+    {label:'02 // url enum',title:'Endpoint discovery',body:'With alive subdomains confirmed, URL enumeration runs across passive and active channels. Katana, Hakrawler, ParamSpider and Arjun crawl; passive results from GAU are cross-referenced.',
+     groups:[{key:'[active crawling]',items:['Katana · Hakrawler','ParamSpider · Arjun']},{key:'[url gathering]',items:['GAU','WayMoreUrls','URLFinder']}]},
+    {label:'03 // fingerprint',title:'Tech stack & ports',body:'Wappalyzer / WhatWeb identify stacks across targets. Gowitness captures snapshots. httpx, Naabu and Nmap scan ports — resolved IPs separated, CDN excluded.',
+     groups:[{key:'[tech stack]',items:['httpx · WhatWeb','framework → vuln map']},{key:'[snapshots]',items:['Gowitness']},{key:'[port scan]',items:['httpx','Naabu','Nmap']}]},
+    {label:'04 // exploit',title:'Vulnerability assessment',body:'With the full surface mapped, assessment begins. Nuclei templates run across targets; GF patterns combine with vuln-specific tools; API endpoints probed with GraphQL Map.',
+     groups:[{key:'[vuln tools]',items:['Dalfox · XSStrike','SSRFMap · SQLMap','SSTIMap · Commix']},{key:'[nuclei + api]',items:['Nuclei','GF','GraphQL Map']}]},
+  ];
+  experience = [
+    {company:'MindSprint',period:'May 2025 – Present',role:'Jr. Engineer — Application Security',
+     bullets:['Application security assessments, VAPT and secure code reviews on enterprise systems','Threat modeling and vulnerability triage across production-grade applications','Collaborating with dev teams to remediate critical findings and establish a secure SDLC'],
+     chips:['AppSec','VAPT','Code Review','Threat Modeling','SDLC']},
+    {company:'HackTheBox',period:'Sep 2022 – Present',role:'Meetup Organizer',
+     bullets:['Launched 11+ cybersecurity events and ethical-hacking competitions with 400+ attendance','Coordinated a 100+ member team across workshops, competitions & training sessions','Competed in 50+ CTF competitions — 15th nationally on CTFtime'],
+     chips:['CTF','Event Org','Community Lead','HackTheBox']},
+  ];
+  bars = [
+    {name:'Web Application Pentesting',level:'Advanced',val:90},
+    {name:'Network Penetration Testing',level:'Advanced',val:84},
+    {name:'OSINT & Recon',level:'Advanced',val:88},
+    {name:'Linux Privilege Escalation',level:'Advanced',val:86},
+    {name:'Active Directory Attacks',level:'Proficient',val:72},
+    {name:'Forensics & Steganography',level:'Proficient',val:78},
+    {name:'Cryptography (CTF)',level:'Proficient',val:70},
+  ];
+  toolsRaw = [
+    ['Burp Suite Pro',1],['ffuf',1],['nuclei',1],['subfinder',1],['amass',1],['httpx',1],['gau',1],['waybackurls',1],
+    ['sqlmap',0],['dalfox',0],['nikto',0],['gobuster',0],['nmap',0],['metasploit',0],['shodan',0],['censys',0],
+    ['binwalk',0],['zsteg',0],['mitmproxy',0],['CyberChef',0],['Volatility',0],['Katana',0],['BBOT',0],
+  ];
+  languagesRaw = [['Python',1],['Bash',1],['C++',0],['C',0]];
+  skillPlatforms = [
+    {name:'HackTheBox',badge:'Hacker rank'},{name:'TryHackMe',badge:'Legend · L13'},
+    {name:'CTFtime',badge:'#15 national'},{name:'HackerOne',badge:'Researcher'},{name:'Bugcrowd',badge:'Researcher'},
+  ];
+  hofCompanies = [
+    {count:'2',suffix:'×',name:'UNILEVER'},{count:'3',suffix:'×',name:'OYO ROOMS'},{count:'1',suffix:'×',name:'CLASSDOJO'},
+    {count:'2',suffix:'×',name:'ACT FIBERNET'},{count:'1',suffix:'×',name:'BAMBU LABS'},{count:'1',suffix:'×',name:'PORSCHE'},
+  ];
+  hofRankings = [
+    {rank:'02',event:'Cyber Delta CTF',detail:'2ND PLACE · GLOBAL'},
+    {rank:'05',event:'Info-Sec Write-Ups CTF',detail:'5TH PLACE · WORLDWIDE'},
+    {rank:'09',event:'Yukthi CTF — TN Police',detail:'9TH PLACE · STATE LEVEL'},
+    {rank:'15',event:'CTFtime National',detail:'#15 NATIONALLY'},
+    {rank:'T50',event:'TryHackMe — Legend L13',detail:'TOP 50 WORLDWIDE · TOP 5 INDIA'},
+    {rank:'40+',event:'HackTheBox — Hacker',detail:'40+ MACHINES ROOTED'},
+  ];
+  projects = [
+    {num:'01',type:'bash · recon · automation',title:'Cypher — Subdomain Enumerator',desc:'Automates comprehensive subdomain enumeration by running multiple well-known tools and passive data sources in parallel, then aggregates and deduplicates every discovered subdomain into a single output file.',link:'https://github.com/akshayrajs/cypher',linkLabel:'github'},
+    {num:'02',type:'python · mitmproxy · web security',title:'SSTI Vulnerability Checker',desc:'Automated Server-Side Template Injection detection powered by mitmproxy. Increased reporting efficiency by 60%, providing command-execution risk data across diverse template engines.',link:'https://github.com/L1v3y/SSTI-Fuzz',linkLabel:'github'},
+    {num:'03',type:'ctf machine · owasp top 10',title:'Vulnerable Lab — CTF Machine',desc:'Intermediate CTF machine with 3–4 distinct vulnerabilities spanning OWASP Top 10 attack surfaces and privilege-escalation paths, designed for realistic community skill-building.',link:'https://drive.google.com/file/d/19BP3VDScHWsgOQ2ZffNYlQ16A90dvWSr/view',linkLabel:'drive'},
+  ];
+  certs = [
+    {issuer:'Pristine InfoSolution',name:'Certified Information Security & Ethical Hacker (CISEH)',link:'https://drive.google.com/file/d/10iCZAhYX3byVjM6n52bxevMyfHCic1XH/view'},
+    {issuer:'Microsoft',name:'SC-900: Security, Compliance & Identity Fundamentals',link:'https://www.credly.com/badges/2a640cd0-1a0b-429a-ac16-14e6a92dc9fd'},
+    {issuer:'Cisco',name:'Networking Basics',link:'https://www.credly.com/badges/e89f91b6-8d3c-4dce-a25d-7aedcd38f7e4'},
+  ];
+  contact = [
+    {label:'Email',href:'mailto:kumpawatakshayraj@gmail.com'},
+    {label:'LinkedIn',href:'https://www.linkedin.com/in/akshayrajs/'},
+    {label:'GitHub',href:'https://github.com/L1v3y'},
+    {label:'Blog',href:'https://medium.com/@livey'},
+    {label:'TryHackMe',href:'https://tryhackme.com/p/livey'},
+    {label:'HackTheBox',href:'https://app.hackthebox.com/profile/824412'},
+  ];
 
-/* mobile accordion */
-function toggleAm(header){
-  const body = header.nextElementSibling;
-  const isOpen = header.classList.contains('open');
-  // close all
-  document.querySelectorAll('.am-header').forEach(h=>{
-    h.classList.remove('open');
-    h.nextElementSibling.classList.remove('open');
-  });
-  if(!isOpen){header.classList.add('open');body.classList.add('open')}
-}
+  renderVals() {
+    const acc = this.props.accentColor || '#30D158';
+    const mk = (raw)=>raw.map(([name,h])=>({name, color: h ? '#f5f5f7' : '#a1a1a6', border: h ? 'rgba(48,209,88,.35)' : 'rgba(255,255,255,.09)'}));
+    return {
+      nav:this.nav, stats:this.stats, platforms:this.platforms, approach:this.approach,
+      experience:this.experience, bars:this.bars, tools:mk(this.toolsRaw), languages:mk(this.languagesRaw),
+      skillPlatforms:this.skillPlatforms, hofCompanies:this.hofCompanies, hofRankings:this.hofRankings,
+      projects:this.projects, certs:this.certs, contact:this.contact,
+    };
+  }
 
-/* nav scroll */
-window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('sc',scrollY>60));
+  componentDidMount() {
+    const acc = this.props.accentColor || '#30D158';
+    const calm = this.props.motion === 'Calm';
+    const rm = matchMedia('(prefers-reduced-motion: reduce)').matches || calm;
+    const root = document.getElementById('root-wrap') || document;
+    if (this.props.accentColor) {
+      root.style.setProperty('--acc', acc);
+      root.style.setProperty('--acc2', acc);
+    }
+    const ease = 'cubic-bezier(0.22,1,0.36,1)';
 
-/* particles */
-const ptc=document.getElementById('pts');
-for(let i=0;i<32;i++){
-  const p=document.createElement('div');p.className='pt';
-  const s=Math.random()*1.5+.5;
-  p.style.cssText=`left:${Math.random()*100}%;width:${s}px;height:${s}px;opacity:${Math.random()*.2+.04};animation-duration:${Math.random()*22+10}s;animation-delay:${Math.random()*20}s`;
-  ptc.appendChild(p);
-}
+    // scroll reveals
+    const io = new IntersectionObserver((ents)=>{
+      ents.forEach(e=>{
+        if(!e.isIntersecting) return;
+        const el=e.target; io.unobserve(el);
+        const delay=+(el.getAttribute('data-delay')||0);
+        if(rm){ el.style.opacity='1'; el.style.transform='none'; return; }
+        el.animate([{opacity:0,transform:'translateY(28px)'},{opacity:1,transform:'translateY(0)'}],{duration:820,delay,easing:ease,fill:'both'});
+      });
+    },{threshold:0.12,rootMargin:'0px 0px -7% 0px'});
+    root.querySelectorAll('[data-reveal]').forEach(el=>{ if(!rm) el.style.opacity='0'; io.observe(el); });
 
-/* terminal typewriter */
-const tout=document.getElementById('tout');
-let li=0;
-function nl(){
-  if(li>=D.terminal.lines.length)return;
-  const l=D.terminal.lines[li];
-  if(l.b){tout.innerHTML+='<br>';li++;setTimeout(nl,60);return}
-  if(l.o){const d=document.createElement('div');d.innerHTML=`<span class="to">${l.o}</span>`;tout.appendChild(d);li++;tout.scrollTop=tout.scrollHeight;setTimeout(nl,45);return}
-  if(l.p){
-    const d=document.createElement('div');
-    d.innerHTML=`<span class="tp">${l.p}</span><span class="tc" id="tc${li}"></span>`;
-    tout.appendChild(d);
-    if(l.cmd==='_'){document.getElementById(`tc${li}`).innerHTML='<span class="tcur"></span>';return}
-    let ci=0,id=li;
-    const f=()=>{const e=document.getElementById(`tc${id}`);if(!e)return;if(ci<l.cmd.length){e.textContent=l.cmd.slice(0,++ci);setTimeout(f,46)}else{li++;setTimeout(nl,180)}};
-    setTimeout(f,130);
+    // skill bars
+    const bio = new IntersectionObserver((ents)=>{
+      ents.forEach(e=>{
+        if(!e.isIntersecting) return; bio.unobserve(e.target);
+        const el=e.target, v=el.getAttribute('data-val');
+        if(rm){ el.style.width=v+'%'; return; }
+        el.animate([{width:'0%'},{width:v+'%'}],{duration:1500,easing:ease,fill:'both'});
+      });
+    },{threshold:0.4});
+    root.querySelectorAll('[data-bar]').forEach(el=>bio.observe(el));
+
+    // nav translucency on scroll
+    const nav=document.getElementById('nav');
+    const onScroll=()=>{ const s=scrollY>40; if(nav){ nav.style.background=s?'rgba(6,6,7,.74)':'rgba(6,6,7,.4)'; nav.style.borderBottomColor=s?'rgba(255,255,255,.08)':'transparent'; } };
+    addEventListener('scroll',onScroll,{passive:true}); onScroll();
+
+    // terminal typewriter
+    this.runTerminal(rm);
+
+    // physical draggable badge
+    this.wireBadge(rm);
+
+    // footer clock
+    const clock=document.getElementById('clock');
+    const tick=()=>{ if(clock) clock.textContent='IST '+new Date().toLocaleTimeString('en-GB',{timeZone:'Asia/Kolkata',hour12:false}); };
+    tick(); this._clock=setInterval(tick,1000);
+  }
+
+  componentWillUnmount(){ if(this._clock) clearInterval(this._clock); }
+
+  runTerminal(rm){
+    const out=document.getElementById('term-out'); if(!out||out._ran) return; out._ran=true;
+    const lines=this.terminalLines; let i=0;
+    const cursor='<span style="display:inline-block;width:8px;height:15px;background:#30D158;vertical-align:-2px;margin-left:2px;animation:blink 1s step-end infinite"></span>';
+    if(rm){
+      out.innerHTML=lines.map(l=>{
+        if(l.b) return '<div style="height:12px"></div>';
+        if(l.o) return '<div style="color:#8a8a90">'+l.o+'</div>';
+        if(l.end) return '<div><span style="color:#30D158">'+l.p+'</span>'+cursor+'</div>';
+        return '<div><span style="color:#30D158">'+l.p+'</span><span style="color:#f5f5f7">'+l.cmd+'</span></div>';
+      }).join('');
+      return;
+    }
+    const next=()=>{
+      if(i>=lines.length) return;
+      const l=lines[i];
+      if(l.b){ out.insertAdjacentHTML('beforeend','<div style="height:12px"></div>'); i++; setTimeout(next,70); return; }
+      if(l.o){ const d=document.createElement('div'); d.style.color='#8a8a90'; d.innerHTML=l.o; out.appendChild(d); i++; setTimeout(next,55); return; }
+      if(l.end){ out.insertAdjacentHTML('beforeend','<div><span style="color:#30D158">'+l.p+'</span>'+cursor+'</div>'); return; }
+      const d=document.createElement('div'); d.innerHTML='<span style="color:#30D158">'+l.p+'</span><span style="color:#f5f5f7"></span>';
+      out.appendChild(d); const span=d.lastChild; let c=0; const id=i;
+      const type=()=>{ if(c<l.cmd.length){ span.textContent=l.cmd.slice(0,++c); setTimeout(type,48); } else { i++; setTimeout(next,190); } };
+      setTimeout(type,120);
+    };
+    setTimeout(next,420);
+  }
+
+  wireBadge(rm){
+    const b=document.getElementById('phys-badge'); if(!b) return;
+    let x=0,y=0,vx=0,vy=0,drag=false,raf=null,gx=0,gy=0,px=0,py=0;
+    const set=()=>{ b.style.transform='translate('+x.toFixed(1)+'px,'+y.toFixed(1)+'px)'; };
+    const spring=()=>{
+      if(drag) return;
+      const k=0.14,d=0.78;
+      vx+=(0-x)*k; vy+=(0-y)*k; vx*=d; vy*=d; x+=vx; y+=vy; set();
+      if(Math.abs(x)>0.2||Math.abs(y)>0.2||Math.abs(vx)>0.2||Math.abs(vy)>0.2){ raf=requestAnimationFrame(spring); }
+      else { x=0;y=0;set(); }
+    };
+    b.addEventListener('pointerdown',e=>{ b.setPointerCapture(e.pointerId); drag=true; cancelAnimationFrame(raf); gx=e.clientX-x; gy=e.clientY-y; px=e.clientX; py=e.clientY; b.style.cursor='grabbing'; });
+    b.addEventListener('pointermove',e=>{ if(!drag) return; vx=e.clientX-px; vy=e.clientY-py; px=e.clientX; py=e.clientY; x=e.clientX-gx; y=e.clientY-gy; set(); });
+    const release=()=>{ if(!drag) return; drag=false; b.style.cursor='grab'; if(rm){ x=0;y=0;set(); } else { raf=requestAnimationFrame(spring); } };
+    b.addEventListener('pointerup',release);
+    b.addEventListener('pointercancel',release);
   }
 }
-setTimeout(nl,400);
-
-/* scroll reveal */
-const obs=new IntersectionObserver(es=>{
-  es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in')});
-},{threshold:.08});
-document.querySelectorAll('.rv,.rv-l,.rv-r,.tli,.ac,.hlc,.hri,.pc,.cc,.plat-card,.si').forEach(el=>obs.observe(el));
-
-/* sticky scroll */
-const stickyCopy = D.approach;
-const slides2 = document.querySelectorAll('.sstep');
-const sLabel = document.getElementById('s-label');
-const sBig   = document.getElementById('s-big');
-const sBody  = document.getElementById('s-body');
-let curStep = -1;
-function setStickyStep(i){
-  if(i===curStep)return;curStep=i;
-  const s=stickyCopy[i];
-  sLabel.textContent=s.label;
-  sBig.textContent=s.big;
-  sBody.textContent=s.body;
-  slides2.forEach((sl,idx)=>sl.classList.toggle('active',idx===i));
-}
-const sObs=new IntersectionObserver(es=>{
-  es.forEach(e=>{if(e.isIntersecting)setStickyStep(parseInt(e.target.dataset.step))});
-},{threshold:.5});
-document.querySelectorAll('.sstrigger').forEach(t=>sObs.observe(t));
-// init first step
-if(stickyCopy.length>0)setStickyStep(0);
-
-/* parallax grid */
-window.addEventListener('scroll',()=>{
-  const g=document.querySelector('.hgrid');
-  if(g)g.style.transform=`translateY(${scrollY*.08}px)`;
-});
-
-/* clock */
-const fc=document.getElementById('fc');
-setInterval(()=>{fc.textContent='IST '+new Date().toLocaleTimeString('en-IN',{timeZone:'Asia/Kolkata',hour12:false})},1000);
 </script>
 </body>
 </html>
